@@ -27,9 +27,12 @@ ssh root@76.13.58.79
 
 ```bash
 apt update
-apt install -y docker.io docker-compose
+apt install -y docker.io
 systemctl enable docker
 systemctl start docker
+
+# Verify docker compose is available (included with modern Docker)
+docker compose version
 ```
 
 ### Install Nginx & Certbot
@@ -132,7 +135,7 @@ DB_USER="rankpanda_prod"
 mkdir -p $BACKUP_DIR
 
 # Backup database
-docker-compose -f docker-compose.prod.yml exec -T postgres pg_dump -U $DB_USER $DB_NAME | gzip > $BACKUP_DIR/rankpanda_$(date +%Y-%m-%d_%H-%M-%S).sql.gz
+docker compose -f docker-compose.prod.yml exec -T postgres pg_dump -U $DB_USER $DB_NAME | gzip > $BACKUP_DIR/rankpanda_$(date +%Y-%m-%d_%H-%M-%S).sql.gz
 
 # Keep only last 7 days
 find $BACKUP_DIR -name "rankpanda_*.sql.gz" -mtime +7 -delete
@@ -164,13 +167,13 @@ chmod +x scripts/deploy.sh
 cd /opt/rankpanda-app
 
 # Build Docker images
-docker-compose -f docker-compose.prod.yml build
+docker compose -f docker-compose.prod.yml build
 
 # Start containers
-docker-compose -f docker-compose.prod.yml up -d
+docker compose -f docker-compose.prod.yml up -d
 
 # Run migrations
-docker-compose -f docker-compose.prod.yml exec -T app npx prisma migrate deploy
+docker compose -f docker-compose.prod.yml exec -T app npx prisma migrate deploy
 
 # Verify
 curl https://app.rankpanda.cloud/api/health
@@ -196,8 +199,8 @@ curl -X POST https://app.rankpanda.cloud/api/auth/signup \
 ### View Logs
 
 ```bash
-docker-compose -f docker-compose.prod.yml logs -f app
-docker-compose -f docker-compose.prod.yml logs -f postgres
+docker compose -f docker-compose.prod.yml logs -f app
+docker compose -f docker-compose.prod.yml logs -f postgres
 ```
 
 ## Monitoring
@@ -210,13 +213,13 @@ Automatically checked every 30 seconds by Docker.
 
 ```bash
 # Check container status
-docker-compose -f docker-compose.prod.yml ps
+docker compose -f docker-compose.prod.yml ps
 
 # Check disk space
 df -h
 
 # Check logs for errors
-docker-compose -f docker-compose.prod.yml logs app | tail -50
+docker compose -f docker-compose.prod.yml logs app | tail -50
 ```
 
 ## Backup & Restore
@@ -232,7 +235,7 @@ ls -lh /backups/
 
 ```bash
 BACKUP_FILE="/backups/rankpanda_2026-05-13_02-00-00.sql.gz"
-gunzip < $BACKUP_FILE | docker-compose -f docker-compose.prod.yml exec -T postgres psql -U rankpanda_prod rankpanda_prod
+gunzip < $BACKUP_FILE | docker compose -f docker-compose.prod.yml exec -T postgres psql -U rankpanda_prod rankpanda_prod
 ```
 
 ## Troubleshooting
@@ -248,13 +251,13 @@ kill -9 PID    # Kill it
 
 ```bash
 # Check if postgres is healthy
-docker-compose -f docker-compose.prod.yml ps
+docker compose -f docker-compose.prod.yml ps
 
 # View postgres logs
-docker-compose -f docker-compose.prod.yml logs postgres
+docker compose -f docker-compose.prod.yml logs postgres
 
 # Restart postgres
-docker-compose -f docker-compose.prod.yml restart postgres
+docker compose -f docker-compose.prod.yml restart postgres
 ```
 
 ### Nginx SSL Certificate Issues
@@ -269,13 +272,13 @@ systemctl restart nginx
 
 ```bash
 # View error logs
-docker-compose -f docker-compose.prod.yml logs app -n 100
+docker compose -f docker-compose.prod.yml logs app -n 100
 
 # Restart application
-docker-compose -f docker-compose.prod.yml restart app
+docker compose -f docker-compose.prod.yml restart app
 
 # Check Prisma schema
-docker-compose -f docker-compose.prod.yml exec -T app npx prisma db push
+docker compose -f docker-compose.prod.yml exec -T app npx prisma db push
 ```
 
 ## Maintenance
@@ -293,7 +296,7 @@ git pull origin main
 Migrations run automatically on deploy. To manually run:
 
 ```bash
-docker-compose -f docker-compose.prod.yml exec app npx prisma migrate deploy
+docker compose -f docker-compose.prod.yml exec app npx prisma migrate deploy
 ```
 
 ### SSL Certificate Renewal
@@ -323,7 +326,7 @@ Store securely — never in Git.
 
 ```bash
 # Connect to postgres
-docker-compose -f docker-compose.prod.yml exec postgres psql -U rankpanda_prod rankpanda_prod
+docker compose -f docker-compose.prod.yml exec postgres psql -U rankpanda_prod rankpanda_prod
 
 # View indexes
 \d keywords

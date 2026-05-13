@@ -34,14 +34,14 @@ rsync -avz \
 # 2. Build and start containers
 echo ""
 echo "2. Building and starting containers..."
-ssh "$VPS_USER@$VPS_IP" "cd $APP_DIR && docker-compose -f docker-compose.prod.yml build"
-ssh "$VPS_USER@$VPS_IP" "cd $APP_DIR && docker-compose -f docker-compose.prod.yml down" 2>/dev/null || true
-ssh "$VPS_USER@$VPS_IP" "cd $APP_DIR && docker-compose -f docker-compose.prod.yml up -d"
+ssh "$VPS_USER@$VPS_IP" "cd $APP_DIR && docker compose -f docker-compose.prod.yml build"
+ssh "$VPS_USER@$VPS_IP" "cd $APP_DIR && docker compose -f docker-compose.prod.yml down" 2>/dev/null || true
+ssh "$VPS_USER@$VPS_IP" "cd $APP_DIR && docker compose -f docker-compose.prod.yml up -d"
 
 # 3. Run migrations
 echo ""
 echo "3. Running Prisma migrations..."
-ssh "$VPS_USER@$VPS_IP" "cd $APP_DIR && docker-compose -f docker-compose.prod.yml exec -T app npx prisma migrate deploy"
+ssh "$VPS_USER@$VPS_IP" "cd $APP_DIR && docker compose -f docker-compose.prod.yml exec -T app npx prisma migrate deploy"
 
 # 4. Verify health
 echo ""
