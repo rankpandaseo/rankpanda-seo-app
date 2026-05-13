@@ -20,6 +20,29 @@ services:
     networks:
       - rankpanda_network
 
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: rankpanda_app
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      NODE_ENV: "development"
+      DATABASE_URL: "postgresql://rankpanda:rankpanda@postgres:5432/rankpanda_dev"
+      SESSION_SECRET: "dev-secret-key-change-in-production"
+      PORT: 3000
+    ports:
+      - "3000:3000"
+    networks:
+      - rankpanda_network
+    restart: unless-stopped
+    volumes:
+      - .:/app
+      - /app/node_modules
+      - /app/.next
+
 volumes:
   postgres_data:
 

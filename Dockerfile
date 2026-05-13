@@ -7,10 +7,10 @@ WORKDIR /app
 COPY package*.json ./
 RUN npm ci
 
-# Copy source code
+# Copy source code and Prisma schema
 COPY . .
 
-# Build Next.js
+# Generate Prisma Client
 RUN npm run build
 
 # Production stage
