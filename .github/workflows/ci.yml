@@ -1,0 +1,44 @@
+name: Tests & Lint
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: rankpanda
+          POSTGRES_PASSWORD: rankpanda
+          POSTGRES_DB: rankpanda_test
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+
+    steps:
+      - uses: actions/checkout@v4
+      
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+      
+      - run: npm ci
+      
+      - run: npm run lint
+      
+      - run: DATABASE_URL=postgresql://rankpanda:rankpanda@localhost:5432/rankpanda_test npm test -- --coverage
+      
+      - uses: codecov/codecov-action@v3
+        with:
+          files: ./coverage/lcov.info

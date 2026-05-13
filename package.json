@@ -1,0 +1,52 @@
+{
+  "name": "rankpanda-seo-app",
+  "version": "1.0.0",
+  "description": "Phase 1: Standalone Web SaaS for semantic keyword research (Next.js + PostgreSQL)",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage",
+    "test:e2e": "playwright test",
+    "lint": "eslint pages lib components --max-warnings 0",
+    "lint:fix": "eslint pages lib components --fix",
+    "db:studio": "prisma studio",
+    "db:seed": "ts-node prisma/seed.ts",
+    "db:push": "prisma db push",
+    "db:migrate": "prisma migrate dev"
+  },
+  "dependencies": {
+    "next": "^14.0.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "prisma": "^5.0.0",
+    "@prisma/client": "^5.0.0",
+    "bcryptjs": "^2.4.3",
+    "papaparse": "^5.4.1",
+    "zustand": "^4.4.1"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "@types/react": "^18.2.0",
+    "@types/jest": "^29.5.0",
+    "@types/bcryptjs": "^2.4.2",
+    "typescript": "^5.0.0",
+    "jest": "^29.5.0",
+    "@testing-library/react": "^14.0.0",
+    "@testing-library/jest-dom": "^6.0.0",
+    "node-mocks-http": "^1.13.0",
+    "@playwright/test": "^1.40.0",
+    "eslint": "^8.50.0",
+    "eslint-config-next": "^14.0.0",
+    "tailwindcss": "^3.3.0",
+    "postcss": "^8.4.31",
+    "autoprefixer": "^10.4.16"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=9.0.0"
+  }
+}

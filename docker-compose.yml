@@ -1,0 +1,28 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: rankpanda_postgres
+    environment:
+      POSTGRES_USER: rankpanda
+      POSTGRES_PASSWORD: rankpanda
+      POSTGRES_DB: rankpanda_dev
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U rankpanda"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - rankpanda_network
+
+volumes:
+  postgres_data:
+
+networks:
+  rankpanda_network:
+    driver: bridge

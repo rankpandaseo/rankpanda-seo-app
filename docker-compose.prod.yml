@@ -1,0 +1,52 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: rankpanda_postgres_prod
+    environment:
+      POSTGRES_USER: rankpanda_prod
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: rankpanda_prod
+    volumes:
+      - postgres_data_prod:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U rankpanda_prod"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - rankpanda_network_prod
+    restart: unless-stopped
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: rankpanda_app_prod
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      NODE_ENV: "production"
+      DATABASE_URL: "postgresql://rankpanda_prod:${DB_PASSWORD}@postgres:5432/rankpanda_prod"
+      SESSION_SECRET: ${SESSION_SECRET}
+      PORT: 3000
+    ports:
+      - "3000:3000"
+    networks:
+      - rankpanda_network_prod
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
+volumes:
+  postgres_data_prod:
+
+networks:
+  rankpanda_network_prod:
+    driver: bridge
