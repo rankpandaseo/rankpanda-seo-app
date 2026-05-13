@@ -3,9 +3,6 @@ const nextConfig = {
   reactStrictMode: true,
   swcMinify: true,
   pageExtensions: ['ts', 'tsx'],
-  env: {
-    NODE_ENV: process.env.NODE_ENV || 'development',
-  },
   headers: async () => {
     return [
       {
