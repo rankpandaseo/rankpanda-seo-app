@@ -1,8 +1,10 @@
 import { PassThrough } from 'stream';
 import { Response } from '@remix-run/node';
 import { RemixServer } from '@remix-run/react';
-import isbot from 'isbot';
+import * as isBotModule from 'isbot';
 import { renderToPipeableStream } from 'react-dom/server';
+
+const isbot = (isBotModule.default || isBotModule.isbot || isBotModule) as (ua: string) => boolean;
 
 const ABORT_DELAY = 5_000;
 
