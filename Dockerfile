@@ -33,8 +33,9 @@ COPY --from=builder /app/prisma ./prisma
 # Generate Prisma Client for production
 RUN npx prisma generate
 
-# Run database migrations before starting
-RUN npx prisma migrate deploy || true
+# Copy entrypoint script
+COPY docker-entrypoint.sh /app/docker-entrypoint.sh
+RUN chmod +x /app/docker-entrypoint.sh
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
@@ -43,4 +44,4 @@ HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
 # Start application
 EXPOSE 3000
 
-CMD ["npm", "start"]
+ENTRYPOINT ["/app/docker-entrypoint.sh"]
