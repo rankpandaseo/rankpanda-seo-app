@@ -1,16 +1,29 @@
 version: '3.8'
 
 services:
+  app:
+    build: .
+    ports:
+      - '3000:3000'
+    environment:
+      - DATABASE_URL=postgresql://rankpanda:rankpanda@postgres:5432/rankpanda_prod
+      - SESSION_SECRET=super-secret-remix-session-key-2026
+      - NODE_ENV=production
+    depends_on:
+      - postgres
+    restart: unless-stopped
+
   postgres:
-    image: postgres:15-alpine
+    image: postgres:16-alpine
     environment:
       POSTGRES_USER: rankpanda
-      POSTGRES_PASSWORD: rankpanda_dev
-      POSTGRES_DB: rankpanda_dev
+      POSTGRES_PASSWORD: rankpanda
+      POSTGRES_DB: rankpanda_prod
     ports:
-      - "5432:5432"
+      - '5432:5432'
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    restart: unless-stopped
 
 volumes:
   postgres_data:

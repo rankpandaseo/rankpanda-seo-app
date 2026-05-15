@@ -19,47 +19,69 @@ type ActionData = {
 };
 
 export const action: ActionFunction = async ({ request }) => {
+  console.log('[auth.login] POST request received');
+
   if (request.method !== 'POST') {
     return json({ error: 'Method not allowed' }, { status: 405 });
   }
 
-  const formData = await request.formData();
-  const email = formData.get('email') as string;
-  const password = formData.get('password') as string;
+  try {
+    console.log('[auth.login] parsing formData...');
+    const formData = await request.formData();
+    const email = formData.get('email') as string;
+    const password = formData.get('password') as string;
+    console.log('[auth.login] form parsed:', { email: email?.substring(0, 3) + '***' });
 
-  if (!email || !password) {
-    return json({ error: 'Email e password são obrigatórios' }, { status: 400 });
+    if (!email || !password) {
+      console.log('[auth.login] missing email or password');
+      return json({ error: 'Email e password são obrigatórios' }, { status: 400 });
+    }
+
+    console.log('[auth.login] querying user by email...');
+    const user = await db.user.findUnique({ where: { email } });
+    if (!user) {
+      console.log('[auth.login] user not found');
+      return json({ error: 'Email ou password incorretos' }, { status: 401 });
+    }
+    console.log('[auth.login] user found:', { id: user.id, status: user.status });
+
+    console.log('[auth.login] verifying password...');
+    const passwordValid = await verifyPassword(password, user.password);
+    if (!passwordValid) {
+      console.log('[auth.login] password invalid');
+      return json({ error: 'Email ou password incorretos' }, { status: 401 });
+    }
+    console.log('[auth.login] password valid');
+
+    if (user.status === 'pending') {
+      console.log('[auth.login] user pending approval');
+      return json(
+        { error: 'A tua conta está em análise. Um administrador irá aprová-la em breve.' },
+        { status: 403 }
+      );
+    }
+
+    if (user.status === 'banned') {
+      console.log('[auth.login] user banned');
+      return json({ error: 'A tua conta foi bloqueada.' }, { status: 403 });
+    }
+
+    console.log('[auth.login] creating session...');
+    const session = await getSession(request.headers.get('Cookie'));
+    session.set('userId', user.id);
+    console.log('[auth.login] committing session...');
+    const sessionCookie = await commitSession(session);
+    console.log('[auth.login] session committed, redirecting to /app');
+
+    return redirect('/app', {
+      headers: {
+        'Set-Cookie': sessionCookie,
+      },
+    });
+  } catch (error) {
+    console.error('[auth.login] UNEXPECTED ERROR:', error);
+    return json({ error: 'Erro ao fazer login' }, { status: 500 });
   }
-
-  const user = await db.user.findUnique({ where: { email } });
-  if (!user) {
-    return json({ error: 'Email ou password incorretos' }, { status: 401 });
-  }
-
-  const passwordValid = await verifyPassword(password, user.password);
-  if (!passwordValid) {
-    return json({ error: 'Email ou password incorretos' }, { status: 401 });
-  }
-
-  if (user.status === 'pending') {
-    return json(
-      { error: 'A tua conta está em análise. Um administrador irá aprová-la em breve.' },
-      { status: 403 }
-    );
-  }
-
-  if (user.status === 'banned') {
-    return json({ error: 'A tua conta foi bloqueada.' }, { status: 403 });
-  }
-
-  const session = await getSession(request.headers.get('Cookie'));
-  session.set('userId', user.id);
-
-  return redirect('/app', {
-    headers: {
-      'Set-Cookie': await commitSession(session),
-    },
-  });
 };
 
 export default function LoginPage() {

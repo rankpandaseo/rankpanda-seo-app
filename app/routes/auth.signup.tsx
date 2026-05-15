@@ -20,35 +20,46 @@ type ActionData = {
 };
 
 export const action: ActionFunction = async ({ request }) => {
+  console.log('[auth.signup] POST request received');
+
   if (request.method !== 'POST') {
     return json({ error: 'Method not allowed' }, { status: 405 });
   }
 
-  const formData = await request.formData();
-  const email = formData.get('email') as string;
-  const password = formData.get('password') as string;
-  const confirmPassword = formData.get('confirmPassword') as string;
-
-  if (!email || !password || !confirmPassword) {
-    return json({ error: 'Todos os campos são obrigatórios' }, { status: 400 });
-  }
-
-  if (password !== confirmPassword) {
-    return json({ error: 'As passwords não correspondem' }, { status: 400 });
-  }
-
-  if (password.length < 8) {
-    return json({ error: 'A password deve ter pelo menos 8 caracteres' }, { status: 400 });
-  }
-
-  const existingUser = await db.user.findUnique({ where: { email } });
-  if (existingUser) {
-    return json({ error: 'Este email já está registado' }, { status: 400 });
-  }
-
-  const hashedPassword = await hashPassword(password);
-
   try {
+    console.log('[auth.signup] parsing formData...');
+    const formData = await request.formData();
+    const email = formData.get('email') as string;
+    const password = formData.get('password') as string;
+    const confirmPassword = formData.get('confirmPassword') as string;
+    console.log('[auth.signup] form parsed:', { email: email?.substring(0, 3) + '***' });
+
+    if (!email || !password || !confirmPassword) {
+      console.log('[auth.signup] missing required fields');
+      return json({ error: 'Todos os campos são obrigatórios' }, { status: 400 });
+    }
+
+    if (password !== confirmPassword) {
+      console.log('[auth.signup] passwords do not match');
+      return json({ error: 'As passwords não correspondem' }, { status: 400 });
+    }
+
+    if (password.length < 8) {
+      console.log('[auth.signup] password too short');
+      return json({ error: 'A password deve ter pelo menos 8 caracteres' }, { status: 400 });
+    }
+
+    console.log('[auth.signup] checking if email exists...');
+    const existingUser = await db.user.findUnique({ where: { email } });
+    if (existingUser) {
+      console.log('[auth.signup] email already registered');
+      return json({ error: 'Este email já está registado' }, { status: 400 });
+    }
+
+    console.log('[auth.signup] hashing password...');
+    const hashedPassword = await hashPassword(password);
+    console.log('[auth.signup] creating user in database...');
+
     await db.user.create({
       data: {
         email,
@@ -58,8 +69,10 @@ export const action: ActionFunction = async ({ request }) => {
       },
     });
 
+    console.log('[auth.signup] user created successfully');
     return json({ success: true } as ActionData);
   } catch (error) {
+    console.error('[auth.signup] UNEXPECTED ERROR:', error);
     return json({ error: 'Erro ao criar conta' }, { status: 500 });
   }
 };

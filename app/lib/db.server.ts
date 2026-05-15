@@ -4,8 +4,15 @@ declare global {
   var __db: PrismaClient | undefined;
 }
 
-export const db = global.__db || new PrismaClient();
+let db: PrismaClient;
 
-if (process.env.NODE_ENV === 'development') {
-  global.__db = db;
+if (process.env.NODE_ENV === 'production') {
+  db = new PrismaClient();
+} else {
+  if (!global.__db) {
+    global.__db = new PrismaClient();
+  }
+  db = global.__db;
 }
+
+export { db };
