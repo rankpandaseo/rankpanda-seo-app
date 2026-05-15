@@ -1,7 +1,5 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 
-const SHOPIFY_API_SECRET = process.env.SHOPIFY_API_SECRET || '';
-
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'GET') {
     return res.status(405).json({ error: 'Method not allowed' });
@@ -14,11 +12,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       return res.status(400).json({ error: 'Missing required parameters' });
     }
 
-    // Verify HMAC (simplified)
-    if (!SHOPIFY_API_SECRET) {
-      console.warn('Shopify API secret not configured, skipping HMAC verification');
-    }
-
     // Decode state
     let decodedState: any;
     try {
@@ -27,15 +20,39 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       return res.status(400).json({ error: 'Invalid state parameter' });
     }
 
-    // Redirect to client with auth code
-    // In production, exchange code for access token server-side
+    // Exchange auth code for access token server-side
+    const exchangeResponse = await fetch(
+      `${req.headers['x-forwarded-proto'] || 'http'}://${req.headers.host}/api/shopify/exchange-token`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          code: code as string,
+          shopDomain: shop as string,
+        }),
+      }
+    );
+
+    if (!exchangeResponse.ok) {
+      console.error('Token exchange failed:', await exchangeResponse.text());
+      const redirectUrl = new URL('/app/setup', `${req.headers['x-forwarded-proto'] || 'http'}://${req.headers.host}`);
+      redirectUrl.searchParams.set('shopifyError', 'Token exchange failed');
+      return res.redirect(redirectUrl.toString());
+    }
+
+    const { accessToken, scope } = await exchangeResponse.json();
+
+    // Redirect to client with access token
     const redirectUrl = new URL('/app/setup', `${req.headers['x-forwarded-proto'] || 'http'}://${req.headers.host}`);
-    redirectUrl.searchParams.set('shopifyAuthCode', code as string);
+    redirectUrl.searchParams.set('shopifyAccessToken', accessToken);
     redirectUrl.searchParams.set('shopifyShop', shop as string);
+    redirectUrl.searchParams.set('shopifyScope', scope);
 
     return res.redirect(redirectUrl.toString());
   } catch (error) {
     console.error('Shopify auth callback error:', error);
-    return res.status(500).json({ error: 'Internal server error' });
+    const redirectUrl = new URL('/app/setup', `${req.headers['x-forwarded-proto'] || 'http'}://${req.headers.host}`);
+    redirectUrl.searchParams.set('shopifyError', 'Authorization failed');
+    return res.redirect(redirectUrl.toString());
   }
 }

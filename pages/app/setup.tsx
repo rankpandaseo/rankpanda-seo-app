@@ -8,6 +8,13 @@ function ShopifyAuthStep({ data, onDataChange }: any) {
   const [status, setStatus] = useState<'idle' | 'connecting' | 'connected' | 'error'>('idle');
   const [errorMsg, setErrorMsg] = useState('');
 
+  useEffect(() => {
+    if (data.shopifyError) {
+      setStatus('error');
+      setErrorMsg(data.shopifyError);
+    }
+  }, [data.shopifyError]);
+
   const handleInitiateAuth = async () => {
     if (!shopDomain) {
       setErrorMsg('Enter your Shopify store domain (e.g., mystore.myshopify.com)');
@@ -89,17 +96,22 @@ export default function Setup() {
 
   // Handle Shopify OAuth callback
   useEffect(() => {
-    const { shopifyAuthCode, shopifyShop } = router.query;
-    if (shopifyAuthCode && shopifyShop) {
-      // In production, exchange code for access token server-side
-      // For now, store code and shop domain
+    const { shopifyAccessToken, shopifyShop, shopifyScope, shopifyError } = router.query;
+    if (shopifyAccessToken && shopifyShop) {
       setData((prev: any) => ({
         ...prev,
-        shopifyAuthCode,
-        shopifyShop,
-        shopifyAccessToken: `temp_token_${shopifyAuthCode}`,
+        shopifyAccessToken: shopifyAccessToken as string,
+        shopifyShop: shopifyShop as string,
+        shopifyScope: shopifyScope as string,
       }));
       // Clean up URL
+      router.push('/app/setup');
+    } else if (shopifyError) {
+      console.error('Shopify auth error:', shopifyError);
+      setData((prev: any) => ({
+        ...prev,
+        shopifyError: shopifyError as string,
+      }));
       router.push('/app/setup');
     }
   }, [router.query, router]);
