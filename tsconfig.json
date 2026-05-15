@@ -6,7 +6,7 @@
       "DOM",
       "DOM.Iterable"
     ],
-    "jsx": "preserve",
+    "jsx": "react-jsx",
     "module": "ESNext",
     "moduleResolution": "bundler",
     "allowJs": true,
@@ -19,18 +19,23 @@
     "noEmit": true,
     "baseUrl": ".",
     "paths": {
-      "@/*": [
-        "./*"
+      "~/*": [
+        "./app/*"
       ]
     },
-    "incremental": true
+    "incremental": true,
+    "types": [
+      "node"
+    ]
   },
   "include": [
-    "next-env.d.ts",
+    "remix.env.d.ts",
     "**/*.ts",
     "**/*.tsx"
   ],
   "exclude": [
-    "node_modules"
+    "node_modules",
+    "build",
+    "dist"
   ]
 }
