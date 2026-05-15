@@ -14,32 +14,25 @@ export default async function handler(
   const { session: token } = req.cookies;
 
   if (!token) {
-    return res.status(401).json({ error: 'No session' });
+    return res.status(401).json({ error: 'Unauthorized' });
   }
 
   try {
     const sessionRecord = await prisma.session.findUnique({
       where: { token },
-      include: {
-        user: {
-          select: {
-            id: true,
-            email: true,
-          },
-        },
-      },
     });
 
-    if (!sessionRecord || sessionRecord.expiresAt < new Date()) {
+    if (!sessionRecord) {
       return res.status(401).json({ error: 'Session expired' });
     }
 
-    return res.status(200).json({
-      user: sessionRecord.user,
-      sessionValid: true,
+    const projetos = await prisma.projeto.findMany({
+      where: { userId: sessionRecord.userId },
     });
+
+    return res.status(200).json(projetos);
   } catch (error) {
-    console.error('Session error:', error);
+    console.error('Error fetching projetos:', error);
     return res.status(500).json({ error: 'Internal server error' });
   }
 }

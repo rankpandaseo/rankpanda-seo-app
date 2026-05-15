@@ -14,37 +14,26 @@ export default async function handler(
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  const { email, password, confirmPassword } = req.body;
+  const { email, password } = req.body;
 
-  if (!email || !password || !confirmPassword) {
-    return res.status(400).json({ error: 'Missing required fields' });
-  }
-
-  if (password !== confirmPassword) {
-    return res.status(400).json({ error: 'Passwords do not match' });
-  }
-
-  if (password.length < 8) {
-    return res.status(400).json({ error: 'Password must be at least 8 characters' });
+  if (!email || !password) {
+    return res.status(400).json({ error: 'Missing email or password' });
   }
 
   try {
-    const existingUser = await prisma.user.findUnique({
+    const user = await prisma.user.findUnique({
       where: { email },
     });
 
-    if (existingUser) {
-      return res.status(409).json({ error: 'Email already exists' });
+    if (!user) {
+      return res.status(401).json({ error: 'Invalid credentials' });
     }
 
-    const hashedPassword = await bcrypt.hash(password, 10);
+    const isPasswordValid = await bcrypt.compare(password, user.password);
 
-    const user = await prisma.user.create({
-      data: {
-        email,
-        password: hashedPassword,
-      },
-    });
+    if (!isPasswordValid) {
+      return res.status(401).json({ error: 'Invalid credentials' });
+    }
 
     const token = crypto.randomBytes(32).toString('hex');
     const expiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
@@ -67,12 +56,18 @@ export default async function handler(
 
     res.setHeader('Set-Cookie', cookie);
 
-    return res.status(201).json({
+    const projetos = await prisma.projeto.findMany({
+      where: { userId: user.id },
+    });
+
+    const redirectUrl = projetos.length === 0 ? '/app/setup' : '/app';
+
+    return res.status(200).json({
       user: { id: user.id, email: user.email },
-      redirectUrl: '/app/setup',
+      redirectUrl,
     });
   } catch (error) {
-    console.error('Signup error:', error);
+    console.error('Login error:', error);
     return res.status(500).json({ error: 'Internal server error' });
   }
 }
