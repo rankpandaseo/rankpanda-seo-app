@@ -5,6 +5,7 @@ import type { LinksFunction, LoaderFunctionArgs } from '@remix-run/node';
 import { json, redirect } from '@remix-run/node';
 import { Links, LiveReload, Meta, Outlet, Scripts, ScrollRestoration, useLoaderData } from '@remix-run/react';
 import { getSession } from './lib/session.server';
+import { db } from './lib/db.server';
 
 export const links: LinksFunction = () => [
   ...(cssBundleHref ? [{ rel: 'stylesheet', href: cssBundleHref }] : []),
@@ -12,12 +13,17 @@ export const links: LinksFunction = () => [
 
 export async function loader({ request }: LoaderFunctionArgs) {
   const session = await getSession(request.headers.get('cookie'));
-  const user = session.get('user');
+  const userId = session.get('userId');
+  let user = null;
 
-  // Block pending/banned users from accessing /app routes
-  if (request.url.includes('/app') && user) {
-    if (user.status === 'pending' || user.status === 'banned') {
-      return redirect('/auth/login?error=access_denied');
+  if (userId) {
+    user = await db.user.findUnique({ where: { id: userId } });
+
+    // Block pending/banned users from accessing /app routes
+    if (request.url.includes('/app')) {
+      if (!user || user.status === 'pending' || user.status === 'banned') {
+        return redirect('/auth/login?error=access_denied');
+      }
     }
   }
 
