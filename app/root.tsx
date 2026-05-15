@@ -1,15 +1,12 @@
 import { AppProvider } from '@shopify/polaris';
 import '@shopify/polaris/build/esm/styles.css';
-import { cssBundleHref } from '@remix-run/css-bundle';
 import type { LinksFunction, LoaderFunctionArgs } from '@remix-run/node';
 import { json, redirect } from '@remix-run/node';
 import { Links, LiveReload, Meta, Outlet, Scripts, ScrollRestoration, useLoaderData } from '@remix-run/react';
 import { getSession } from './lib/session.server';
 import { db } from './lib/db.server';
 
-export const links: LinksFunction = () => [
-  ...(cssBundleHref ? [{ rel: 'stylesheet', href: cssBundleHref }] : []),
-];
+export const links: LinksFunction = () => [];
 
 export async function loader({ request }: LoaderFunctionArgs) {
   const session = await getSession(request.headers.get('cookie'));
