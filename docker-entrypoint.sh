@@ -2,8 +2,11 @@
 set -e
 
 echo "[entrypoint] Waiting for PostgreSQL..."
-until pg_isready -h postgres -U rankpanda; do
-  echo "PostgreSQL not ready, retrying..."
+max_attempts=30
+attempt=0
+until node -e "require('net').createConnection({host: 'postgres', port: 5432}, () => process.exit(0)).on('error', () => process.exit(1))" || [ $attempt -ge $max_attempts ]; do
+  attempt=$((attempt+1))
+  echo "PostgreSQL not ready (attempt $attempt/$max_attempts), retrying..."
   sleep 2
 done
 
