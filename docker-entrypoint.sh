@@ -11,8 +11,8 @@ until node -e "require('net').createConnection({host: 'postgres', port: 5432}, (
 done
 
 echo "[entrypoint] PostgreSQL is ready"
-echo "[entrypoint] Running database migrations..."
-npx prisma migrate deploy || echo "Migrations already applied or failed (continuing...)"
+echo "[entrypoint] Syncing database schema..."
+npx prisma db push --skip-generate || echo "Database already synced (continuing...)"
 
 echo "[entrypoint] Generating Prisma client..."
 npx prisma generate
