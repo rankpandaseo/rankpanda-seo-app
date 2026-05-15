@@ -25,13 +25,11 @@ model Projeto {
 
   shopName  String
 
-  // Setup Wizard - 9 campos obrigatórios
   businessContext     String?  @db.Text
   businessKeywords    String?  @db.Text
   merchantCenterCategories String? @db.Text
   voiceTone           String?  @db.Text
 
-  // Integrações - configuração
   ga4PropertyId       String?
   ga4Credentials      String?  @db.Text
 
@@ -43,11 +41,9 @@ model Projeto {
   seRankingApiKey     String?
   seRankingProjectId  String?
 
-  // Shopify OAuth
   shopifyAccessToken  String?  @db.Text
   shopifyRefreshToken String?  @db.Text
 
-  // Setup status
   setupCompleted      Boolean  @default(false)
   currentSetupStep    Int      @default(0)
 

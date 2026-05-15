@@ -1,28 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { prisma } from '@/lib/db';
-
-// Simple CSV parser
-function parseCSV(content: string) {
-  const lines = content.trim().split('\n');
-  const keywords = [];
-
-  for (let i = 1; i < lines.length; i++) {
-    // Skip header and empty lines
-    if (!lines[i].trim()) continue;
-
-    const [keyword, searchVolume, intent] = lines[i].split(',').map((s) => s.trim());
-
-    if (keyword) {
-      keywords.push({
-        keyword,
-        searchVolume: searchVolume ? parseInt(searchVolume) : undefined,
-        intent: intent || undefined,
-      });
-    }
-  }
-
-  return keywords;
-}
+import { getSession } from '@/lib/auth';
 
 export default async function handler(
   req: NextApiRequest,
@@ -32,66 +10,74 @@ export default async function handler(
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  // Get session from cookie
-  const sessionToken = req.cookies.session;
-  if (!sessionToken) {
-    return res.status(401).json({ error: 'Not authenticated' });
-  }
-
-  // Verify session
-  const session = await prisma.session.findUnique({
-    where: { token: sessionToken },
-  });
-
-  if (!session || new Date() > session.expiresAt) {
-    return res.status(401).json({ error: 'Session expired' });
-  }
-
-  const userId = session.userId;
-
   try {
-    // For simplicity, we'll extract CSV from the request body
-    // In a real app, you'd use multer or similar for file uploads
-    const { csvContent } = req.body;
+    const cookies = req.headers.cookie || '';
+    const sessionToken = cookies
+      .split(';')
+      .find((c) => c.trim().startsWith('session='))
+      ?.split('=')[1];
 
-    if (!csvContent) {
-      return res.status(400).json({ error: 'CSV content required' });
+    if (!sessionToken) {
+      return res.status(401).json({ error: 'Unauthorized' });
     }
 
-    // Parse CSV
-    const keywords = parseCSV(csvContent);
+    const session = await prisma.session.findUnique({
+      where: { token: sessionToken },
+      include: { user: true },
+    });
 
-    if (keywords.length === 0) {
-      return res.status(400).json({ error: 'No keywords found in CSV' });
+    if (!session || session.expiresAt < new Date()) {
+      return res.status(401).json({ error: 'Session expired' });
     }
 
-    // Import keywords
-    let imported = 0;
+    const { csv, projectoId } = req.body;
+
+    if (!csv || !projectoId) {
+      return res.status(400).json({ error: 'Missing csv or projectoId' });
+    }
+
+    // Verify projeto ownership
+    const projeto = await prisma.projeto.findUnique({
+      where: { id: projectoId },
+    });
+
+    if (!projeto || projeto.userId !== session.user.id) {
+      return res.status(403).json({ error: 'Forbidden' });
+    }
+
+    const lines = csv.split('\n');
+    const keywords = [];
+
+    for (const line of lines) {
+      if (!line.trim()) continue;
+      keywords.push({
+        keyword: line.trim(),
+        searchVolume: null,
+        intent: null,
+      });
+    }
+
     for (const kw of keywords) {
       try {
-        await prisma.keyword.create({
+        await prisma.keywordResearch.create({
           data: {
-            userId,
+            projectoId,
             keyword: kw.keyword,
             searchVolume: kw.searchVolume || null,
             intent: kw.intent || null,
-            status: 'active',
           },
         });
-        imported++;
-      } catch (error) {
-        // Skip duplicates
-        console.error('Error importing keyword:', error);
+      } catch (e: any) {
+        if (e.code === 'P2002') {
+          continue;
+        }
+        throw e;
       }
     }
 
-    return res.status(201).json({
-      imported,
-      total: keywords.length,
-      message: `Importadas ${imported} de ${keywords.length} palavras-chave`,
-    });
+    res.status(200).json({ success: true, imported: keywords.length });
   } catch (error) {
-    console.error('Error processing CSV:', error);
-    return res.status(500).json({ error: 'Internal server error' });
+    console.error('CSV parse error:', error);
+    res.status(500).json({ error: 'Failed to parse CSV' });
   }
 }

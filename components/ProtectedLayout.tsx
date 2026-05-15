@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
-import { AppShell, Frame, TopBar } from '@shopify/polaris';
 import { getSession, logout } from '../lib/auth';
 
 interface ProtectedLayoutProps {
@@ -38,28 +37,37 @@ export default function ProtectedLayout({ children, title }: ProtectedLayoutProp
   };
 
   if (loading) {
-    return <div>Loading...</div>;
+    return <div style={{ padding: '20px' }}>Carregando...</div>;
   }
 
   if (!user) {
     return null;
   }
 
-  const topBarMarkup = (
-    <TopBar
-      showNavigationToggle
-      userMenu={{
-        actions: [{ items: [{ content: 'Logout', onAction: handleLogout }] }],
-        name: user.email,
-      }}
-    />
-  );
-
   return (
-    <Frame topBar={topBarMarkup}>
-      <AppShell>
+    <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
+      <header style={{ display: 'flex', justifyContent: 'space-between', padding: '16px', borderBottom: '1px solid #e5e5e5', backgroundColor: '#fafafa' }}>
+        <h1 style={{ margin: 0, fontSize: '18px', fontWeight: '600' }}>{title || 'Dashboard'}</h1>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+          <span style={{ fontSize: '14px', color: '#666' }}>{user.email}</span>
+          <button
+            onClick={handleLogout}
+            style={{
+              padding: '8px 16px',
+              backgroundColor: '#f3f3f3',
+              border: '1px solid #d9d9d9',
+              borderRadius: '4px',
+              cursor: 'pointer',
+              fontSize: '14px',
+            }}
+          >
+            Logout
+          </button>
+        </div>
+      </header>
+      <main style={{ flex: 1 }}>
         {children}
-      </AppShell>
-    </Frame>
+      </main>
+    </div>
   );
 }

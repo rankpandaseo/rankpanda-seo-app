@@ -5,50 +5,47 @@ export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse
 ) {
-  if (req.method !== 'DELETE') {
-    return res.status(405).json({ error: 'Method not allowed' });
-  }
+  const cookies = req.headers.cookie || '';
+  const sessionToken = cookies
+    .split(';')
+    .find((c) => c.trim().startsWith('session='))
+    ?.split('=')[1];
 
-  // Get session from cookie
-  const sessionToken = req.cookies.session;
   if (!sessionToken) {
-    return res.status(401).json({ error: 'Not authenticated' });
+    return res.status(401).json({ error: 'Unauthorized' });
   }
 
-  // Verify session
   const session = await prisma.session.findUnique({
     where: { token: sessionToken },
+    include: { user: true },
   });
 
-  if (!session || new Date() > session.expiresAt) {
+  if (!session || session.expiresAt < new Date()) {
     return res.status(401).json({ error: 'Session expired' });
   }
 
-  const userId = session.userId;
-  const { id } = req.query;
+  if (req.method === 'DELETE') {
+    const { id } = req.query;
 
-  if (!id || typeof id !== 'string') {
-    return res.status(400).json({ error: 'Keyword ID is required' });
-  }
-
-  try {
-    // Verify keyword belongs to user
-    const keyword = await prisma.keyword.findUnique({
-      where: { id },
-    });
-
-    if (!keyword || keyword.userId !== userId) {
-      return res.status(404).json({ error: 'Keyword not found' });
+    if (!id || typeof id !== 'string') {
+      return res.status(400).json({ error: 'Missing id' });
     }
 
-    // Delete keyword
-    await prisma.keyword.delete({
+    const keyword = await prisma.keywordResearch.findUnique({
+      where: { id },
+      include: { projeto: true },
+    });
+
+    if (!keyword || keyword.projeto.userId !== session.user.id) {
+      return res.status(403).json({ error: 'Forbidden' });
+    }
+
+    await prisma.keywordResearch.delete({
       where: { id },
     });
 
-    return res.status(200).json({ message: 'Keyword deleted' });
-  } catch (error) {
-    console.error('Error deleting keyword:', error);
-    return res.status(500).json({ error: 'Internal server error' });
+    return res.status(200).json({ success: true });
   }
+
+  res.status(405).json({ error: 'Method not allowed' });
 }
