@@ -12,10 +12,7 @@ done
 
 echo "[entrypoint] PostgreSQL is ready"
 echo "[entrypoint] Syncing database schema..."
-npx prisma db push --skip-generate || echo "Database already synced (continuing...)"
-
-echo "[entrypoint] Generating Prisma client..."
-npx prisma generate
+npx prisma db push || echo "Database already synced (continuing...)"
 
 echo "[entrypoint] Seeding database (if needed)..."
 npm run db:seed || echo "Admin user already exists"
