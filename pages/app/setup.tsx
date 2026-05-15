@@ -1,6 +1,73 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import ProtectedLayout from '@/components/ProtectedLayout';
+
+function ShopifyAuthStep({ data, onDataChange }: any) {
+  const [shopDomain, setShopDomain] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [status, setStatus] = useState<'idle' | 'connecting' | 'connected' | 'error'>('idle');
+  const [errorMsg, setErrorMsg] = useState('');
+
+  const handleInitiateAuth = async () => {
+    if (!shopDomain) {
+      setErrorMsg('Enter your Shopify store domain (e.g., mystore.myshopify.com)');
+      return;
+    }
+
+    setLoading(true);
+    setStatus('connecting');
+    setErrorMsg('');
+
+    try {
+      const response = await fetch('/api/shopify/auth-init', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ shopDomain }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to initiate OAuth');
+      }
+
+      const { authUrl } = await response.json();
+      window.location.href = authUrl;
+    } catch (error) {
+      setLoading(false);
+      setStatus('error');
+      setErrorMsg(error instanceof Error ? error.message : 'Authorization failed');
+    }
+  };
+
+  return (
+    <div>
+      <p className="text-gray-600 mb-4">Autoriza a RankPanda a aceder à tua loja Shopify.</p>
+      {data.shopifyAccessToken ? (
+        <div className="bg-green-50 border border-green-200 rounded px-4 py-2 mb-4">
+          <p className="text-green-700">✓ Shopify autorizado com sucesso</p>
+        </div>
+      ) : (
+        <div className="space-y-3">
+          <input
+            type="text"
+            className="w-full border rounded px-3 py-2"
+            placeholder="mystore.myshopify.com"
+            value={shopDomain}
+            onChange={(e) => setShopDomain(e.target.value)}
+            disabled={loading}
+          />
+          <button
+            onClick={handleInitiateAuth}
+            disabled={loading}
+            className="w-full bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 disabled:opacity-50"
+          >
+            {loading ? 'A redirecionar...' : 'Autorizar Shopify'}
+          </button>
+          {errorMsg && <p className="text-red-600 text-sm">{errorMsg}</p>}
+        </div>
+      )}
+    </div>
+  );
+}
 
 const SETUP_STEPS = [
   'Contexto do Negócio',
@@ -20,6 +87,23 @@ export default function Setup() {
   const [data, setData] = useState<any>({});
   const [loading, setLoading] = useState(false);
 
+  // Handle Shopify OAuth callback
+  useEffect(() => {
+    const { shopifyAuthCode, shopifyShop } = router.query;
+    if (shopifyAuthCode && shopifyShop) {
+      // In production, exchange code for access token server-side
+      // For now, store code and shop domain
+      setData((prev: any) => ({
+        ...prev,
+        shopifyAuthCode,
+        shopifyShop,
+        shopifyAccessToken: `temp_token_${shopifyAuthCode}`,
+      }));
+      // Clean up URL
+      router.push('/app/setup');
+    }
+  }, [router.query, router]);
+
   const handleNext = () => {
     if (currentStep < SETUP_STEPS.length - 1) {
       setCurrentStep(currentStep + 1);
@@ -37,13 +121,19 @@ export default function Setup() {
   };
 
   const handleFinish = async () => {
+    // Validate Shopify auth
+    if (!data.shopifyAccessToken) {
+      alert('Por favor, autoriza a Shopify antes de continuar');
+      return;
+    }
+
     setLoading(true);
     try {
       const response = await fetch('/api/projetos/create', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          shopName: data.shopName || 'Projeto 1',
+          shopName: data.shopifyShop || data.shopName || 'Projeto 1',
           businessContext: data.businessContext,
           businessKeywords: data.businessKeywords,
           merchantCenterCategories: data.merchantCenterCategories,
@@ -52,6 +142,7 @@ export default function Setup() {
           gscPropertyUrl: data.gscPropertyUrl,
           bingWebmasterToken: data.bingWebmasterToken,
           seRankingApiKey: data.seRankingApiKey,
+          shopifyAccessToken: data.shopifyAccessToken,
           setupCompleted: true,
         }),
       });
@@ -166,12 +257,10 @@ export default function Setup() {
             />
           )}
           {currentStep === 8 && (
-            <div className="text-gray-600">
-              <p className="mb-4">Clica no botão abaixo para autorizar o acesso à tua loja Shopify.</p>
-              <button className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">
-                Autorizar Shopify
-              </button>
-            </div>
+            <ShopifyAuthStep
+              data={data}
+              onDataChange={handleInputChange}
+            />
           )}
         </div>
 
