@@ -2,6 +2,7 @@ import { redirect, type LoaderFunctionArgs } from '@remix-run/node';
 import { Outlet, useLoaderData } from '@remix-run/react';
 import { getSession } from '~/lib/session.server';
 import { db } from '~/lib/db.server';
+import { AppFrame } from '~/design-system';
 
 export async function loader({ request }: LoaderFunctionArgs) {
   const session = await getSession(request.headers.get('cookie'));
@@ -23,139 +24,32 @@ export async function loader({ request }: LoaderFunctionArgs) {
   return { user };
 }
 
+const navItems = [
+  { label: 'Projetos', href: '/app/projetos' },
+  { label: 'Palavras-Chave', href: '/app/keywords' },
+  { label: 'Upload CSV', href: '/app/csv-upload' },
+  { label: 'Definições', href: '/app/settings' },
+];
+
+const adminNavItems = [
+  { label: 'Utilizadores', href: '/app/admin/users' },
+];
+
 export default function AppLayout() {
   const { user } = useLoaderData<typeof loader>();
 
+  const allNavItems = [
+    ...navItems,
+    ...(user.role === 'admin' ? adminNavItems : []),
+  ];
+
   return (
-    <div style={{ minHeight: '100vh', backgroundColor: '#f5f5f5', display: 'flex', flexDirection: 'column' }}>
-      <header style={{
-        padding: '1rem',
-        backgroundColor: '#f0f0f0',
-        borderBottom: '1px solid #ddd',
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center'
-      }}>
-        <h1 style={{ margin: 0, fontSize: '1.5rem', fontWeight: 'bold' }}>
-          RankPanda SEO
-        </h1>
-        <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
-          <p style={{ margin: 0, fontSize: '0.875rem' }}>
-            {user.email} ({user.role})
-          </p>
-          <form method="POST" action="/auth/logout" style={{ margin: 0 }}>
-            <button
-              type="submit"
-              style={{
-                padding: '0.5rem 1rem',
-                backgroundColor: '#007bff',
-                color: 'white',
-                border: 'none',
-                borderRadius: '4px',
-                cursor: 'pointer',
-                fontSize: '0.875rem',
-              }}
-            >
-              Logout
-            </button>
-          </form>
-        </div>
-      </header>
-
-      <div style={{ display: 'flex', flex: 1 }}>
-        <aside style={{
-          backgroundColor: '#f9f9f9',
-          borderRight: '1px solid #ddd',
-          padding: '1rem',
-          minWidth: '200px'
-        }}>
-          <nav>
-            <ul style={{ listStyle: 'none', margin: 0, padding: 0 }}>
-              <li style={{ marginBottom: '0.5rem' }}>
-                <a
-                  href="/app/projetos"
-                  style={{
-                    display: 'block',
-                    padding: '0.5rem 0.75rem',
-                    textDecoration: 'none',
-                    color: '#007bff',
-                    borderRadius: '4px',
-                  }}
-                >
-                  Projetos
-                </a>
-              </li>
-              <li style={{ marginBottom: '0.5rem' }}>
-                <a
-                  href="/app/keywords"
-                  style={{
-                    display: 'block',
-                    padding: '0.5rem 0.75rem',
-                    textDecoration: 'none',
-                    color: '#007bff',
-                    borderRadius: '4px',
-                  }}
-                >
-                  Palavras-Chave
-                </a>
-              </li>
-              <li style={{ marginBottom: '0.5rem' }}>
-                <a
-                  href="/app/csv-upload"
-                  style={{
-                    display: 'block',
-                    padding: '0.5rem 0.75rem',
-                    textDecoration: 'none',
-                    color: '#007bff',
-                    borderRadius: '4px',
-                  }}
-                >
-                  Upload CSV
-                </a>
-              </li>
-              <li style={{ marginBottom: '0.5rem' }}>
-                <a
-                  href="/app/settings"
-                  style={{
-                    display: 'block',
-                    padding: '0.5rem 0.75rem',
-                    textDecoration: 'none',
-                    color: '#007bff',
-                    borderRadius: '4px',
-                  }}
-                >
-                  Definições
-                </a>
-              </li>
-              {user.role === 'admin' && (
-                <>
-                  <li style={{ marginTop: '1rem', marginBottom: '0.5rem', fontWeight: 'bold', fontSize: '0.875rem' }}>
-                    Admin
-                  </li>
-                  <li style={{ marginBottom: '0.5rem' }}>
-                    <a
-                      href="/app/admin/users"
-                      style={{
-                        display: 'block',
-                        padding: '0.5rem 0.75rem',
-                        textDecoration: 'none',
-                        color: '#007bff',
-                        borderRadius: '4px',
-                      }}
-                    >
-                      Utilizadores
-                    </a>
-                  </li>
-                </>
-              )}
-            </ul>
-          </nav>
-        </aside>
-
-        <main style={{ flex: 1, padding: '1rem' }}>
-          <Outlet context={{ user }} />
-        </main>
-      </div>
-    </div>
+    <AppFrame
+      isAdmin={user.role === 'admin'}
+      navItems={allNavItems}
+      activeNav={typeof window !== 'undefined' ? window.location.pathname : undefined}
+    >
+      <Outlet context={{ user }} />
+    </AppFrame>
   );
 }
