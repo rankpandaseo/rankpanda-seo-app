@@ -65,6 +65,20 @@ export const action: ActionFunction = async ({ request }) => {
         reason,
       },
     });
+  } else if (actionType === 'ban') {
+    await db.user.update({
+      where: { id: targetUserId },
+      data: { status: 'banned' },
+    });
+
+    await db.userApprovalLog.create({
+      data: {
+        userId: targetUserId,
+        action: 'banned',
+        approvedBy: userId,
+        reason,
+      },
+    });
   }
 
   return json({ success: true });
@@ -143,12 +157,22 @@ export default function AdminUsersPage() {
                   {new Date(u.createdAt).toLocaleDateString('pt-PT')}
                 </td>
                 <td style={{ padding: '0.75rem' }}>
-                  {u.status === 'pending' && (
+                  {u.status === 'pending' ? (
                     <div style={{ display: 'flex', gap: '0.5rem' }}>
-                      <form method="POST" style={{ display: 'inline' }}>
-                        <input type="hidden" name="action" value="approve" />
-                        <input type="hidden" name="userId" value={u.id} />
-                        <button type="submit" style={{
+                      <button
+                        onClick={() => {
+                          const reason = prompt('Motivo da aprovação (opcional):');
+                          const form = document.createElement('form');
+                          form.method = 'POST';
+                          form.innerHTML = `
+                            <input type="hidden" name="action" value="approve" />
+                            <input type="hidden" name="userId" value="${u.id}" />
+                            <input type="hidden" name="reason" value="${reason || ''}" />
+                          `;
+                          document.body.appendChild(form);
+                          form.submit();
+                        }}
+                        style={{
                           padding: '0.35rem 0.7rem',
                           fontSize: '0.75rem',
                           backgroundColor: '#4CAF50',
@@ -156,14 +180,25 @@ export default function AdminUsersPage() {
                           border: 'none',
                           borderRadius: '4px',
                           cursor: 'pointer'
-                        }}>
-                          Aprovar
-                        </button>
-                      </form>
-                      <form method="POST" style={{ display: 'inline' }}>
-                        <input type="hidden" name="action" value="reject" />
-                        <input type="hidden" name="userId" value={u.id} />
-                        <button type="submit" style={{
+                        }}
+                      >
+                        Aprovar
+                      </button>
+                      <button
+                        onClick={() => {
+                          const reason = prompt('Motivo da rejeição:');
+                          if (!reason) return;
+                          const form = document.createElement('form');
+                          form.method = 'POST';
+                          form.innerHTML = `
+                            <input type="hidden" name="action" value="reject" />
+                            <input type="hidden" name="userId" value="${u.id}" />
+                            <input type="hidden" name="reason" value="${reason}" />
+                          `;
+                          document.body.appendChild(form);
+                          form.submit();
+                        }}
+                        style={{
                           padding: '0.35rem 0.7rem',
                           fontSize: '0.75rem',
                           backgroundColor: '#f44336',
@@ -171,11 +206,40 @@ export default function AdminUsersPage() {
                           border: 'none',
                           borderRadius: '4px',
                           cursor: 'pointer'
-                        }}>
-                          Rejeitar
-                        </button>
-                      </form>
+                        }}
+                      >
+                        Rejeitar
+                      </button>
                     </div>
+                  ) : u.status === 'active' ? (
+                    <button
+                      onClick={() => {
+                        if (confirm('Tens a certeza que queres banir este utilizador?')) {
+                          const form = document.createElement('form');
+                          form.method = 'POST';
+                          form.innerHTML = `
+                            <input type="hidden" name="action" value="ban" />
+                            <input type="hidden" name="userId" value="${u.id}" />
+                            <input type="hidden" name="reason" value="Banido pelo admin" />
+                          `;
+                          document.body.appendChild(form);
+                          form.submit();
+                        }
+                      }}
+                      style={{
+                        padding: '0.35rem 0.7rem',
+                        fontSize: '0.75rem',
+                        backgroundColor: '#ff9800',
+                        color: 'white',
+                        border: 'none',
+                        borderRadius: '4px',
+                        cursor: 'pointer'
+                      }}
+                    >
+                      Banir
+                    </button>
+                  ) : (
+                    <span style={{ fontSize: '0.75rem', color: '#999' }}>—</span>
                   )}
                 </td>
               </tr>
