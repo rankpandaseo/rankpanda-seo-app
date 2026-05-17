@@ -1,6 +1,5 @@
 import { redirect, json, type LoaderFunctionArgs, type ActionFunction } from '@remix-run/node';
 import { useLoaderData, useOutletContext } from '@remix-run/react';
-import { Card, Box, Text, IndexTable, Badge } from '@shopify/polaris';
 import { getSession } from '~/lib/session.server';
 import { db } from '~/lib/db.server';
 
@@ -77,70 +76,113 @@ export default function AdminUsersPage() {
 
   if (user.role !== 'admin') {
     return (
-      <Card>
-        <Text as="p" variant="bodyMd">
+      <div style={{
+        backgroundColor: 'white',
+        borderRadius: '4px',
+        padding: '1.5rem',
+        boxShadow: '0 1px 3px rgba(0,0,0,0.1)'
+      }}>
+        <p style={{ color: '#666' }}>
           Não tens permissão para aceder a esta página.
-        </Text>
-      </Card>
+        </p>
+      </div>
     );
   }
 
-  const rows = users.map((u: any) => {
-    const statusColor = u.status === 'active' ? 'success' : u.status === 'pending' ? 'warning' : 'critical';
-
-    return (
-      <IndexTable.Row key={u.id} id={u.id}>
-        <IndexTable.Cell>{u.email}</IndexTable.Cell>
-        <IndexTable.Cell>{u.role}</IndexTable.Cell>
-        <IndexTable.Cell>
-          <Badge progress={statusColor}>{u.status}</Badge>
-        </IndexTable.Cell>
-        <IndexTable.Cell>{new Date(u.createdAt).toLocaleDateString('pt-PT')}</IndexTable.Cell>
-        <IndexTable.Cell>
-          {u.status === 'pending' && (
-            <Box display="flex" gap="200">
-              <form method="POST" style={{ display: 'inline' }}>
-                <input type="hidden" name="action" value="approve" />
-                <input type="hidden" name="userId" value={u.id} />
-                <button type="submit" style={{ padding: '4px 8px', fontSize: '12px', backgroundColor: '#4CAF50', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>
-                  Aprovar
-                </button>
-              </form>
-              <form method="POST" style={{ display: 'inline' }}>
-                <input type="hidden" name="action" value="reject" />
-                <input type="hidden" name="userId" value={u.id} />
-                <button type="submit" style={{ padding: '4px 8px', fontSize: '12px', backgroundColor: '#f44336', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>
-                  Rejeitar
-                </button>
-              </form>
-            </Box>
-          )}
-        </IndexTable.Cell>
-      </IndexTable.Row>
-    );
-  });
+  const getStatusColor = (status: string) => {
+    if (status === 'active') return '#4CAF50';
+    if (status === 'pending') return '#ff9800';
+    return '#f44336';
+  };
 
   return (
-    <Card>
-      <Box paddingBlockEnd="300">
-        <Text as="h1" variant="headingLg">
-          Gestão de Utilizadores
-        </Text>
-      </Box>
+    <div style={{
+      backgroundColor: 'white',
+      borderRadius: '4px',
+      padding: '1.5rem',
+      boxShadow: '0 1px 3px rgba(0,0,0,0.1)'
+    }}>
+      <h1 style={{ marginTop: 0, marginBottom: '1.5rem' }}>
+        Gestão de Utilizadores
+      </h1>
 
-      <IndexTable
-        resourceName={{ singular: 'utilizador', plural: 'utilizadores' }}
-        itemCount={users.length}
-        headings={[
-          { title: 'Email' },
-          { title: 'Papel' },
-          { title: 'Estado' },
-          { title: 'Criado em' },
-          { title: 'Ações' },
-        ]}
-      >
-        {rows}
-      </IndexTable>
-    </Card>
+      <div style={{ overflowX: 'auto' }}>
+        <table style={{
+          width: '100%',
+          borderCollapse: 'collapse',
+          fontSize: '0.875rem'
+        }}>
+          <thead>
+            <tr style={{ borderBottom: '2px solid #ddd', backgroundColor: '#f9f9f9' }}>
+              <th style={{ padding: '0.75rem', textAlign: 'left', fontWeight: 'bold' }}>Email</th>
+              <th style={{ padding: '0.75rem', textAlign: 'left', fontWeight: 'bold' }}>Papel</th>
+              <th style={{ padding: '0.75rem', textAlign: 'left', fontWeight: 'bold' }}>Estado</th>
+              <th style={{ padding: '0.75rem', textAlign: 'left', fontWeight: 'bold' }}>Criado em</th>
+              <th style={{ padding: '0.75rem', textAlign: 'left', fontWeight: 'bold' }}>Ações</th>
+            </tr>
+          </thead>
+          <tbody>
+            {users.map((u: any) => (
+              <tr key={u.id} style={{ borderBottom: '1px solid #eee' }}>
+                <td style={{ padding: '0.75rem' }}>{u.email}</td>
+                <td style={{ padding: '0.75rem' }}>{u.role}</td>
+                <td style={{ padding: '0.75rem' }}>
+                  <span style={{
+                    display: 'inline-block',
+                    padding: '0.25rem 0.75rem',
+                    borderRadius: '12px',
+                    backgroundColor: getStatusColor(u.status),
+                    color: 'white',
+                    fontSize: '0.75rem',
+                    fontWeight: 'bold'
+                  }}>
+                    {u.status}
+                  </span>
+                </td>
+                <td style={{ padding: '0.75rem' }}>
+                  {new Date(u.createdAt).toLocaleDateString('pt-PT')}
+                </td>
+                <td style={{ padding: '0.75rem' }}>
+                  {u.status === 'pending' && (
+                    <div style={{ display: 'flex', gap: '0.5rem' }}>
+                      <form method="POST" style={{ display: 'inline' }}>
+                        <input type="hidden" name="action" value="approve" />
+                        <input type="hidden" name="userId" value={u.id} />
+                        <button type="submit" style={{
+                          padding: '0.35rem 0.7rem',
+                          fontSize: '0.75rem',
+                          backgroundColor: '#4CAF50',
+                          color: 'white',
+                          border: 'none',
+                          borderRadius: '4px',
+                          cursor: 'pointer'
+                        }}>
+                          Aprovar
+                        </button>
+                      </form>
+                      <form method="POST" style={{ display: 'inline' }}>
+                        <input type="hidden" name="action" value="reject" />
+                        <input type="hidden" name="userId" value={u.id} />
+                        <button type="submit" style={{
+                          padding: '0.35rem 0.7rem',
+                          fontSize: '0.75rem',
+                          backgroundColor: '#f44336',
+                          color: 'white',
+                          border: 'none',
+                          borderRadius: '4px',
+                          cursor: 'pointer'
+                        }}>
+                          Rejeitar
+                        </button>
+                      </form>
+                    </div>
+                  )}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
   );
 }

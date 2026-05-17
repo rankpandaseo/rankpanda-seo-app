@@ -1,6 +1,5 @@
 import { redirect, type LoaderFunctionArgs } from '@remix-run/node';
 import { Outlet, useLoaderData } from '@remix-run/react';
-import { Box, Text } from '@shopify/polaris';
 import { getSession } from '~/lib/session.server';
 import { db } from '~/lib/db.server';
 
@@ -28,132 +27,135 @@ export default function AppLayout() {
   const { user } = useLoaderData<typeof loader>();
 
   return (
-    <Box background="bg-surface">
-      <Box
-        padding="400"
-        background="bg-fill-secondary"
-        borderBottomWidth="1"
-        borderColor="border"
-      >
-        <Box display="flex" justifyContent="space-between" alignItems="center">
-          <Text as="h1" variant="headingLg">
-            RankPanda SEO
-          </Text>
-          <Box display="flex" gap="300" alignItems="center">
-            <Text as="p" variant="bodySm">
-              {user.email} ({user.role})
-            </Text>
-            <form method="POST" action="/auth/logout" style={{ margin: 0 }}>
-              <button
-                type="submit"
-                style={{
-                  padding: '8px 16px',
-                  backgroundColor: '#007bff',
-                  color: 'white',
-                  border: 'none',
-                  borderRadius: '4px',
-                  cursor: 'pointer',
-                  fontSize: '14px',
-                }}
-              >
-                Logout
-              </button>
-            </form>
-          </Box>
-        </Box>
-      </Box>
+    <div style={{ minHeight: '100vh', backgroundColor: '#f5f5f5', display: 'flex', flexDirection: 'column' }}>
+      <header style={{
+        padding: '1rem',
+        backgroundColor: '#f0f0f0',
+        borderBottom: '1px solid #ddd',
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center'
+      }}>
+        <h1 style={{ margin: 0, fontSize: '1.5rem', fontWeight: 'bold' }}>
+          RankPanda SEO
+        </h1>
+        <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+          <p style={{ margin: 0, fontSize: '0.875rem' }}>
+            {user.email} ({user.role})
+          </p>
+          <form method="POST" action="/auth/logout" style={{ margin: 0 }}>
+            <button
+              type="submit"
+              style={{
+                padding: '0.5rem 1rem',
+                backgroundColor: '#007bff',
+                color: 'white',
+                border: 'none',
+                borderRadius: '4px',
+                cursor: 'pointer',
+                fontSize: '0.875rem',
+              }}
+            >
+              Logout
+            </button>
+          </form>
+        </div>
+      </header>
 
-      <Box display="flex">
-        <Box background="bg-fill-tertiary" borderRightWidth="1" borderColor="border">
-          <Box padding="400">
-            <nav style={{ minWidth: '200px' }}>
-              <ul style={{ listStyle: 'none', margin: 0, padding: 0 }}>
-                <li style={{ marginBottom: '8px' }}>
-                  <a
-                    href="/app/projetos"
-                    style={{
-                      display: 'block',
-                      padding: '8px 12px',
-                      textDecoration: 'none',
-                      color: '#007bff',
-                      borderRadius: '4px',
-                    }}
-                  >
-                    Projetos
-                  </a>
-                </li>
-                <li style={{ marginBottom: '8px' }}>
-                  <a
-                    href="/app/keywords"
-                    style={{
-                      display: 'block',
-                      padding: '8px 12px',
-                      textDecoration: 'none',
-                      color: '#007bff',
-                      borderRadius: '4px',
-                    }}
-                  >
-                    Palavras-Chave
-                  </a>
-                </li>
-                <li style={{ marginBottom: '8px' }}>
-                  <a
-                    href="/app/csv-upload"
-                    style={{
-                      display: 'block',
-                      padding: '8px 12px',
-                      textDecoration: 'none',
-                      color: '#007bff',
-                      borderRadius: '4px',
-                    }}
-                  >
-                    Upload CSV
-                  </a>
-                </li>
-                <li style={{ marginBottom: '8px' }}>
-                  <a
-                    href="/app/settings"
-                    style={{
-                      display: 'block',
-                      padding: '8px 12px',
-                      textDecoration: 'none',
-                      color: '#007bff',
-                      borderRadius: '4px',
-                    }}
-                  >
-                    Definições
-                  </a>
-                </li>
-                {user.role === 'admin' && (
-                  <>
-                    <li style={{ marginTop: '16px', marginBottom: '8px', fontWeight: 'bold' }}>
-                      Admin
-                    </li>
-                    <li style={{ marginBottom: '8px' }}>
-                      <a
-                        href="/app/admin/users"
-                        style={{
-                          display: 'block',
-                          padding: '8px 12px',
-                          textDecoration: 'none',
-                          color: '#007bff',
-                          borderRadius: '4px',
-                        }}
-                      >
-                        Utilizadores
-                      </a>
-                    </li>
-                  </>
-                )}
-              </ul>
-            </nav>
-          </Box>
-        </Box>
+      <div style={{ display: 'flex', flex: 1 }}>
+        <aside style={{
+          backgroundColor: '#f9f9f9',
+          borderRight: '1px solid #ddd',
+          padding: '1rem',
+          minWidth: '200px'
+        }}>
+          <nav>
+            <ul style={{ listStyle: 'none', margin: 0, padding: 0 }}>
+              <li style={{ marginBottom: '0.5rem' }}>
+                <a
+                  href="/app/projetos"
+                  style={{
+                    display: 'block',
+                    padding: '0.5rem 0.75rem',
+                    textDecoration: 'none',
+                    color: '#007bff',
+                    borderRadius: '4px',
+                  }}
+                >
+                  Projetos
+                </a>
+              </li>
+              <li style={{ marginBottom: '0.5rem' }}>
+                <a
+                  href="/app/keywords"
+                  style={{
+                    display: 'block',
+                    padding: '0.5rem 0.75rem',
+                    textDecoration: 'none',
+                    color: '#007bff',
+                    borderRadius: '4px',
+                  }}
+                >
+                  Palavras-Chave
+                </a>
+              </li>
+              <li style={{ marginBottom: '0.5rem' }}>
+                <a
+                  href="/app/csv-upload"
+                  style={{
+                    display: 'block',
+                    padding: '0.5rem 0.75rem',
+                    textDecoration: 'none',
+                    color: '#007bff',
+                    borderRadius: '4px',
+                  }}
+                >
+                  Upload CSV
+                </a>
+              </li>
+              <li style={{ marginBottom: '0.5rem' }}>
+                <a
+                  href="/app/settings"
+                  style={{
+                    display: 'block',
+                    padding: '0.5rem 0.75rem',
+                    textDecoration: 'none',
+                    color: '#007bff',
+                    borderRadius: '4px',
+                  }}
+                >
+                  Definições
+                </a>
+              </li>
+              {user.role === 'admin' && (
+                <>
+                  <li style={{ marginTop: '1rem', marginBottom: '0.5rem', fontWeight: 'bold', fontSize: '0.875rem' }}>
+                    Admin
+                  </li>
+                  <li style={{ marginBottom: '0.5rem' }}>
+                    <a
+                      href="/app/admin/users"
+                      style={{
+                        display: 'block',
+                        padding: '0.5rem 0.75rem',
+                        textDecoration: 'none',
+                        color: '#007bff',
+                        borderRadius: '4px',
+                      }}
+                    >
+                      Utilizadores
+                    </a>
+                  </li>
+                </>
+              )}
+            </ul>
+          </nav>
+        </aside>
 
-        <Box flex="1" padding="400">
+        <main style={{ flex: 1, padding: '1rem' }}>
           <Outlet context={{ user }} />
-        </Box>
-      </Box>
-    </Box>
+        </main>
+      </div>
+    </div>
   );
 }
