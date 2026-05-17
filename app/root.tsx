@@ -1,5 +1,3 @@
-import { AppProvider } from '@shopify/polaris';
-import '@shopify/polaris/build/esm/styles.css';
 import type { LinksFunction, LoaderFunctionArgs } from '@remix-run/node';
 import { json, redirect } from '@remix-run/node';
 import { Links, LiveReload, Meta, Outlet, Scripts, ScrollRestoration, useLoaderData } from '@remix-run/react';
@@ -39,9 +37,7 @@ export default function App() {
         <Links />
       </head>
       <body>
-        <AppProvider i18n={{}}>
-          <Outlet context={{ user }} />
-        </AppProvider>
+        <Outlet context={{ user }} />
         <ScrollRestoration />
         <Scripts />
         <LiveReload />

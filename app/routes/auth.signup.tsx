@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { redirect, json, type ActionFunction, type LoaderFunction } from '@remix-run/node';
 import { useActionData, Form, useNavigation } from '@remix-run/react';
-import { Card, TextField, Button, FormLayout, Page, Layout, Text, Box } from '@shopify/polaris';
 import { getSession } from '~/lib/session.server';
 import { hashPassword } from '~/lib/auth.server';
 import { db } from '~/lib/db.server';
@@ -88,99 +87,122 @@ export default function SignupPage() {
 
   if (actionData?.success) {
     return (
-      <Page>
-        <Layout>
-          <Layout.Section>
-            <Card>
-              <Box paddingBlockEnd="400">
-                <Text as="h1" variant="headingLg">
-                  Conta criada com sucesso!
-                </Text>
-              </Box>
-              <Box paddingBlockEnd="300">
-                <Text as="p" variant="bodyMd">
-                  A tua conta foi criada e está em análise. Um administrador aprovará o teu
-                  acesso em breve.
-                </Text>
-              </Box>
-              <Button url="/auth/login" primary>
-                Ir para Login
-              </Button>
-            </Card>
-          </Layout.Section>
-        </Layout>
-      </Page>
+      <div style={{ padding: '2rem', maxWidth: '600px', margin: '0 auto' }}>
+        <h1>Conta criada com sucesso!</h1>
+        <p>Um email de confirmação foi enviado. Por favor, aguarde a aprovação do administrador.</p>
+        <p>A tua conta foi criada e está em análise. Um administrador aprovará o teu acesso em breve.</p>
+        <a href="/auth/login" style={{ color: '#0071e3', textDecoration: 'none', fontWeight: 'bold', fontSize: '1rem', padding: '0.5rem 1rem', display: 'inline-block' }}>
+          Ir para Login
+        </a>
+      </div>
     );
   }
 
   return (
-    <Page>
-      <Layout>
-        <Layout.Section>
-          <Card>
-            <Box paddingBlockEnd="400">
-              <Text as="h1" variant="headingLg">
-                Criar Conta
-              </Text>
-            </Box>
+    <div style={{ padding: '2rem', maxWidth: '600px', margin: '0 auto' }}>
+      <h1>Criar Conta</h1>
 
-            <Form method="POST">
-              <FormLayout>
-                <TextField
-                  label="Email"
-                  type="email"
-                  name="email"
-                  value={email}
-                  onChange={setEmail}
-                  autoComplete="email"
-                  disabled={isSubmitting}
-                />
+      <Form method="POST" style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+        <div>
+          <label htmlFor="email" style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 'bold' }}>
+            Email
+          </label>
+          <input
+            id="email"
+            type="email"
+            name="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            autoComplete="email"
+            disabled={isSubmitting}
+            required
+            style={{
+              width: '100%',
+              padding: '0.5rem',
+              border: '1px solid #ccc',
+              borderRadius: '4px',
+              fontSize: '1rem',
+            }}
+          />
+        </div>
 
-                <TextField
-                  label="Password"
-                  type="password"
-                  name="password"
-                  value={password}
-                  onChange={setPassword}
-                  autoComplete="new-password"
-                  disabled={isSubmitting}
-                  helpText="Mínimo 8 caracteres"
-                />
+        <div>
+          <label htmlFor="password" style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 'bold' }}>
+            Password
+          </label>
+          <input
+            id="password"
+            type="password"
+            name="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            autoComplete="new-password"
+            disabled={isSubmitting}
+            required
+            style={{
+              width: '100%',
+              padding: '0.5rem',
+              border: '1px solid #ccc',
+              borderRadius: '4px',
+              fontSize: '1rem',
+            }}
+          />
+          <small style={{ display: 'block', marginTop: '0.25rem', color: '#666' }}>
+            Mínimo 8 caracteres
+          </small>
+        </div>
 
-                <TextField
-                  label="Confirmar Password"
-                  type="password"
-                  name="confirmPassword"
-                  value={confirmPassword}
-                  onChange={setConfirmPassword}
-                  autoComplete="new-password"
-                  disabled={isSubmitting}
-                />
+        <div>
+          <label htmlFor="confirmPassword" style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 'bold' }}>
+            Confirmar Password
+          </label>
+          <input
+            id="confirmPassword"
+            type="password"
+            name="confirmPassword"
+            value={confirmPassword}
+            onChange={(e) => setConfirmPassword(e.target.value)}
+            autoComplete="new-password"
+            disabled={isSubmitting}
+            required
+            style={{
+              width: '100%',
+              padding: '0.5rem',
+              border: '1px solid #ccc',
+              borderRadius: '4px',
+              fontSize: '1rem',
+            }}
+          />
+        </div>
 
-                {actionData?.error && (
-                  <Box paddingBlockEnd="300">
-                    <Text as="p" variant="bodyMd" tone="critical">
-                      {actionData.error}
-                    </Text>
-                  </Box>
-                )}
+        {actionData?.error && (
+          <div style={{ padding: '0.75rem', backgroundColor: '#fdd', borderLeft: '4px solid #c00', color: '#c00' }}>
+            {actionData.error}
+          </div>
+        )}
 
-                <Box paddingBlockStart="300">
-                  <Button type="submit" primary loading={isSubmitting}>
-                    Criar Conta
-                  </Button>
-                </Box>
+        <button
+          type="submit"
+          disabled={isSubmitting}
+          style={{
+            padding: '0.75rem 1rem',
+            backgroundColor: '#0071e3',
+            color: 'white',
+            border: 'none',
+            borderRadius: '4px',
+            fontSize: '1rem',
+            fontWeight: 'bold',
+            cursor: isSubmitting ? 'not-allowed' : 'pointer',
+            opacity: isSubmitting ? 0.6 : 1,
+          }}
+        >
+          {isSubmitting ? 'A criar conta...' : 'Criar Conta'}
+        </button>
 
-                <Box paddingBlockStart="200">
-                  <Text as="p" variant="bodySm">
-                    Já tens conta? <a href="/auth/login">Entra aqui</a>
-                  </Text>
-                </Box>
-              </FormLayout>
-            </Form>
-          </Card>
-        </Layout.Section>
-      </Layout>
-    </Page>
+        <p style={{ textAlign: 'center', fontSize: '0.9rem', color: '#666' }}>
+          Já tens conta? <a href="/auth/login" style={{ color: '#0071e3', textDecoration: 'none' }}>Entra aqui</a>
+        </p>
+      </Form>
+    </div>
   );
 }
