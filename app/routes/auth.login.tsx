@@ -9,7 +9,16 @@ import { FormField, colors, spacing } from '~/design-system';
 export const loader: LoaderFunction = async ({ request }) => {
   const session = await getSession(request.headers.get('Cookie'));
   if (session.has('userId')) {
-    return redirect('/app');
+    const userId = session.get('userId');
+    const user = await db.user.findUnique({ where: { id: userId } });
+
+    // Only redirect to /app if user status is active
+    if (user && user.status === 'active') {
+      return redirect('/app');
+    }
+
+    // If user exists but status is not active, clear the session and show the login form
+    // (the error will be shown via the error parameter)
   }
   return null;
 };
