@@ -10,6 +10,7 @@ export { typography } from './tokens/typography';
 
 // Components
 export { AppFrame } from './components/layout/AppFrame';
+export { AdminFrame } from './components/layout/AdminFrame';
 export { FormField } from './components/forms/FormField';
 export { Modal } from './components/feedback/Modal';
 export { ToastManager } from './components/feedback/ToastManager';
