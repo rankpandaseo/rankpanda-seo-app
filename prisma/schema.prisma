@@ -7,93 +7,80 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model User {
-  id            String   @id @default(cuid())
-  email         String   @unique
-  password      String   // bcryptjs hash
-  role          String   @default("user")       // "admin" | "user"
-  status        String   @default("pending")    // "pending" | "active" | "banned"
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+model KeywordResearch {
+  id           String   @id
+  projectoId   String
+  keyword      String
+  searchVolume Int?
+  intent       String?
+  status       String   @default("active")
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime
+  Projeto      Projeto  @relation(fields: [projectoId], references: [id], onDelete: Cascade)
 
-  projetos      Projeto[]
-  sessions      Session[]
-  approvalLogs  UserApprovalLog[]
+  @@unique([projectoId, keyword])
+  @@index([projectoId])
 }
 
 model Projeto {
-  id        String   @id @default(cuid())
-  userId    String
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  shopName  String
-
-  businessContext     String?  @db.Text
-  businessKeywords    String?  @db.Text
-  merchantCenterCategories String? @db.Text
-  voiceTone           String?  @db.Text
-
-  ga4PropertyId       String?
-  ga4Credentials      String?  @db.Text
-
-  gscPropertyUrl      String?
-  gscCredentials      String?  @db.Text
-
-  bingWebmasterToken  String?
-
-  seRankingApiKey     String?
-  seRankingProjectId  String?
-
-  shopifyAccessToken  String?  @db.Text
-  shopifyRefreshToken String?  @db.Text
-
-  setupCompleted      Boolean  @default(false)
-  currentSetupStep    Int      @default(0)
-
-  createdAt           DateTime @default(now())
-  updatedAt           DateTime @updatedAt
-
-  keywords            KeywordResearch[]
+  id                       String            @id
+  userId                   String
+  shopName                 String
+  shopDomain               String?
+  businessContext          String?
+  businessKeywords         String?
+  merchantCenterCategories String?
+  voiceTone                String?
+  ga4PropertyId            String?
+  ga4Credentials           String?
+  gscPropertyUrl           String?
+  gscCredentials           String?
+  bingWebmasterToken       String?
+  seRankingApiKey          String?
+  seRankingProjectId       String?
+  shopifyAccessToken       String?
+  shopifyRefreshToken      String?
+  setupCompleted           Boolean           @default(false)
+  currentSetupStep         Int               @default(0)
+  createdAt                DateTime          @default(now())
+  updatedAt                DateTime
+  KeywordResearch          KeywordResearch[]
+  User                     User              @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([userId, shopName])
   @@index([userId])
 }
 
-model KeywordResearch {
-  id         String   @id @default(cuid())
-  projectoId String
-  projeto    Projeto  @relation(fields: [projectoId], references: [id], onDelete: Cascade)
-
-  keyword    String
-  searchVolume Int?
-  intent     String?
-  status     String   @default("active")
-
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
-
-  @@index([projectoId])
-  @@unique([projectoId, keyword])
-}
-
 model Session {
-  id        String   @id @default(cuid())
+  id        String   @id
   userId    String
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-
   token     String   @unique
   expiresAt DateTime
   createdAt DateTime @default(now())
+  User      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model User {
+  id              String            @id
+  email           String            @unique
+  password        String
+  role            String            @default("user")
+  status          String            @default("pending")
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime
+  Projeto         Projeto[]
+  Session         Session[]
+  UserApprovalLog UserApprovalLog[]
 }
 
 model UserApprovalLog {
-  id        String   @id @default(cuid())
-  userId    String
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  action    String   // "approved" | "rejected" | "banned"
-  approvedBy String  // admin userId
-  reason    String?  @db.Text
-  createdAt DateTime @default(now())
+  id         String   @id
+  userId     String
+  action     String
+  approvedBy String
+  reason     String?
+  createdAt  DateTime @default(now())
+  User       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
 }
