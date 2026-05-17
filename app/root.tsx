@@ -3,8 +3,14 @@ import { json, redirect } from '@remix-run/node';
 import { Links, LiveReload, Meta, Outlet, Scripts, ScrollRestoration, useLoaderData } from '@remix-run/react';
 import { getSession } from './lib/session.server';
 import { db } from './lib/db.server';
+import { ToastManager } from './design-system/components/feedback/ToastManager';
 
-export const links: LinksFunction = () => [];
+export const links: LinksFunction = () => [
+  {
+    rel: 'stylesheet',
+    href: 'https://cdn.jsdelivr.net/npm/@shopify/polaris@12.15.0/dist/styles.css',
+  },
+];
 
 export async function loader({ request }: LoaderFunctionArgs) {
   const session = await getSession(request.headers.get('cookie'));
@@ -37,7 +43,9 @@ export default function App() {
         <Links />
       </head>
       <body>
-        <Outlet context={{ user }} />
+        <ToastManager>
+          <Outlet context={{ user }} />
+        </ToastManager>
         <ScrollRestoration />
         <Scripts />
         <LiveReload />
