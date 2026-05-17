@@ -23,7 +23,7 @@ RUN apk add --no-cache openssl
 
 # Install only production dependencies
 COPY package*.json ./
-RUN npm ci --omit=dev
+RUN npm install --omit=dev
 
 # Copy built Remix app from builder
 COPY --from=builder /app/build ./build
