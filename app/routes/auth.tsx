@@ -1,12 +1,18 @@
 import { Outlet } from '@remix-run/react';
-import { Box } from '@shopify/polaris';
 
 export default function AuthLayout() {
   return (
-    <Box background="bg-surface-secondary" minHeight="100vh" padding="400">
-      <Box maxWidth="400px" marginInline="auto">
+    <div style={{
+      background: '#f3f3f3',
+      minHeight: '100vh',
+      padding: '1rem',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center'
+    }}>
+      <div style={{ maxWidth: '400px', width: '100%' }}>
         <Outlet />
-      </Box>
-    </Box>
+      </div>
+    </div>
   );
 }

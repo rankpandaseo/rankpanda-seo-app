@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { redirect, json, type ActionFunction, type LoaderFunction } from '@remix-run/node';
 import { useActionData, Form, useNavigation, useSearchParams } from '@remix-run/react';
-import { Card, TextField, Button, FormLayout, Page, Layout, Text, Box, Banner } from '@shopify/polaris';
 import { getSession, commitSession } from '~/lib/session.server';
 import { verifyPassword } from '~/lib/auth.server';
 import { db } from '~/lib/db.server';
@@ -95,74 +94,101 @@ export default function LoginPage() {
   const accessDenied = searchParams.get('error') === 'access_denied';
 
   return (
-    <Page>
-      <Layout>
-        <Layout.Section>
-          <Card>
-            <Box paddingBlockEnd="400">
-              <Text as="h1" variant="headingLg">
-                Login
-              </Text>
-            </Box>
+    <div style={{ padding: '2rem', maxWidth: '600px', margin: '0 auto' }}>
+      <h1>Login</h1>
 
-            {accessDenied && (
-              <Box paddingBlockEnd="300">
-                <Banner status="critical">
-                  <Text as="p" variant="bodyMd">
-                    A tua sessão expirou. Por favor, entra novamente.
-                  </Text>
-                </Banner>
-              </Box>
-            )}
+      {accessDenied && (
+        <div style={{
+          padding: '0.75rem',
+          backgroundColor: '#fdd',
+          borderLeft: '4px solid #c00',
+          color: '#c00',
+          marginBottom: '1rem'
+        }}>
+          A tua sessão expirou. Por favor, entra novamente.
+        </div>
+      )}
 
-            <Form method="POST">
-              <FormLayout>
-                <TextField
-                  label="Email"
-                  type="email"
-                  name="email"
-                  value={email}
-                  onChange={setEmail}
-                  autoComplete="email"
-                  disabled={isSubmitting}
-                />
+      <Form method="POST" style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+        <div>
+          <label htmlFor="email" style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 'bold' }}>
+            Email
+          </label>
+          <input
+            id="email"
+            type="email"
+            name="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            autoComplete="email"
+            disabled={isSubmitting}
+            required
+            style={{
+              width: '100%',
+              padding: '0.5rem',
+              border: '1px solid #ccc',
+              borderRadius: '4px',
+              fontSize: '1rem',
+            }}
+          />
+        </div>
 
-                <TextField
-                  label="Password"
-                  type="password"
-                  name="password"
-                  value={password}
-                  onChange={setPassword}
-                  autoComplete="current-password"
-                  disabled={isSubmitting}
-                />
+        <div>
+          <label htmlFor="password" style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 'bold' }}>
+            Password
+          </label>
+          <input
+            id="password"
+            type="password"
+            name="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            autoComplete="current-password"
+            disabled={isSubmitting}
+            required
+            style={{
+              width: '100%',
+              padding: '0.5rem',
+              border: '1px solid #ccc',
+              borderRadius: '4px',
+              fontSize: '1rem',
+            }}
+          />
+        </div>
 
-                {actionData?.error && (
-                  <Box paddingBlockEnd="300">
-                    <Banner status="critical">
-                      <Text as="p" variant="bodyMd">
-                        {actionData.error}
-                      </Text>
-                    </Banner>
-                  </Box>
-                )}
+        {actionData?.error && (
+          <div style={{
+            padding: '0.75rem',
+            backgroundColor: '#fdd',
+            borderLeft: '4px solid #c00',
+            color: '#c00'
+          }}>
+            {actionData.error}
+          </div>
+        )}
 
-                <Box paddingBlockStart="300">
-                  <Button type="submit" primary loading={isSubmitting}>
-                    Entrar
-                  </Button>
-                </Box>
+        <button
+          type="submit"
+          disabled={isSubmitting}
+          style={{
+            padding: '0.75rem 1rem',
+            backgroundColor: '#0071e3',
+            color: 'white',
+            border: 'none',
+            borderRadius: '4px',
+            fontSize: '1rem',
+            fontWeight: 'bold',
+            cursor: isSubmitting ? 'not-allowed' : 'pointer',
+            opacity: isSubmitting ? 0.6 : 1,
+          }}
+        >
+          {isSubmitting ? 'A entrar...' : 'Entrar'}
+        </button>
 
-                <Box paddingBlockStart="200">
-                  <Text as="p" variant="bodySm">
-                    Não tens conta? <a href="/auth/signup">Regista-te aqui</a>
-                  </Text>
-                </Box>
-              </FormLayout>
-            </Form>
-          </Card>
-        </Layout.Section>
-      </Layout>
-    </Page>
+        <p style={{ textAlign: 'center', fontSize: '0.9rem', color: '#666' }}>
+          Não tens conta? <a href="/auth/signup" style={{ color: '#0071e3', textDecoration: 'none' }}>Regista-te aqui</a>
+        </p>
+      </Form>
+    </div>
   );
 }
