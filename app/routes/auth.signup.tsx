@@ -32,10 +32,18 @@ export const action: ActionFunction = async ({ request }) => {
     const email = formData.get('email') as string;
     const password = formData.get('password') as string;
     const confirmPassword = formData.get('confirmPassword') as string;
-    console.log('[auth.signup] form parsed:', { email: email?.substring(0, 3) + '***' });
+    console.log('[auth.signup] form parsed:', {
+      email: email?.substring(0, 3) + '***',
+      passwordLength: password?.length || 0,
+      confirmPasswordLength: confirmPassword?.length || 0,
+    });
 
     if (!email || !password || !confirmPassword) {
-      console.log('[auth.signup] missing required fields');
+      console.log('[auth.signup] missing required fields', {
+        hasEmail: !!email,
+        hasPassword: !!password,
+        hasConfirmPassword: !!confirmPassword,
+      });
       return json({ error: 'Todos os campos são obrigatórios' }, { status: 400 });
     }
 
@@ -58,9 +66,14 @@ export const action: ActionFunction = async ({ request }) => {
 
     console.log('[auth.signup] hashing password...');
     const hashedPassword = await hashPassword(password);
+    console.log('[auth.signup] password hashed:', {
+      originalLength: password.length,
+      hashedLength: hashedPassword.length,
+      hashedPreview: hashedPassword.substring(0, 20) + '...',
+    });
     console.log('[auth.signup] creating user in database...');
 
-    await db.user.create({
+    const createdUser = await db.user.create({
       data: {
         email,
         password: hashedPassword,
@@ -69,7 +82,12 @@ export const action: ActionFunction = async ({ request }) => {
       },
     });
 
-    console.log('[auth.signup] user created successfully');
+    console.log('[auth.signup] user created successfully', {
+      userId: createdUser.id,
+      email: createdUser.email,
+      status: createdUser.status,
+      storedPasswordLength: createdUser.password?.length || 0,
+    });
     return json({ success: true } as ActionData);
   } catch (error) {
     console.error('[auth.signup] UNEXPECTED ERROR:', error);

@@ -61,9 +61,15 @@ export const action: ActionFunction = async ({ request }) => {
     console.log('[auth.login] user found:', { id: user.id, status: user.status });
 
     console.log('[auth.login] verifying password...');
+    console.log('[auth.login] password verification details:', {
+      inputPasswordLength: password.length,
+      storedHashLength: user.password?.length || 0,
+      storedHashPreview: user.password?.substring(0, 20) + '...',
+    });
     const passwordValid = await verifyPassword(password, user.password);
+    console.log('[auth.login] password verification result:', passwordValid);
     if (!passwordValid) {
-      console.log('[auth.login] password invalid');
+      console.log('[auth.login] password invalid - verification failed');
       return json({ error: 'Email ou password incorretos' }, { status: 401 });
     }
     console.log('[auth.login] password valid');
