@@ -8,7 +8,7 @@ datasource db {
 }
 
 model KeywordResearch {
-  id           String   @id
+  id           String   @id @default(cuid())
   projectoId   String
   keyword      String
   searchVolume Int?
@@ -23,7 +23,7 @@ model KeywordResearch {
 }
 
 model Projeto {
-  id                       String            @id
+  id                       String            @id @default(cuid())
   userId                   String
   shopName                 String
   shopDomain               String?
@@ -52,7 +52,7 @@ model Projeto {
 }
 
 model Session {
-  id        String   @id
+  id        String   @id @default(cuid())
   userId    String
   token     String   @unique
   expiresAt DateTime
@@ -61,20 +61,20 @@ model Session {
 }
 
 model User {
-  id              String            @id
+  id              String            @id @default(cuid())
   email           String            @unique
   password        String
   role            String            @default("user")
   status          String            @default("pending")
   createdAt       DateTime          @default(now())
-  updatedAt       DateTime
+  updatedAt       DateTime          @updatedAt
   Projeto         Projeto[]
   Session         Session[]
   UserApprovalLog UserApprovalLog[]
 }
 
 model UserApprovalLog {
-  id         String   @id
+  id         String   @id @default(cuid())
   userId     String
   action     String
   approvedBy String
