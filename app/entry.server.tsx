@@ -30,8 +30,10 @@ function handleBotRequest(
         onAllReady() {
           shellRendered = true;
           responseHeaders.set('Content-Type', 'text/html');
+          const stream = new PassThrough();
+          pipe(stream);
           resolve(
-            new Response(pipe, {
+            new Response(stream as any, {
               headers: responseHeaders,
               status: responseStatusCode,
             })
@@ -42,7 +44,7 @@ function handleBotRequest(
         },
         onError(error: unknown) {
           responseStatusCode = 500;
-          console.error(error);
+          console.error('Bot render error:', error);
         },
       }
     );
@@ -64,8 +66,10 @@ function handleBrowserRequest(
         onShellReady() {
           shellRendered = true;
           responseHeaders.set('Content-Type', 'text/html');
+          const stream = new PassThrough();
+          pipe(stream);
           resolve(
-            new Response(pipe, {
+            new Response(stream as any, {
               headers: responseHeaders,
               status: responseStatusCode,
             })
@@ -75,7 +79,7 @@ function handleBrowserRequest(
           reject(new Error('Shell error'));
         },
         onError(error: unknown) {
-          console.error(error);
+          console.error('Browser render error:', error);
           responseStatusCode = 500;
         },
       }
