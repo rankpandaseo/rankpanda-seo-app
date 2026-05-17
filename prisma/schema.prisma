@@ -15,7 +15,7 @@ model KeywordResearch {
   intent       String?
   status       String   @default("active")
   createdAt    DateTime @default(now())
-  updatedAt    DateTime
+  updatedAt    DateTime @updatedAt
   Projeto      Projeto  @relation(fields: [projectoId], references: [id], onDelete: Cascade)
 
   @@unique([projectoId, keyword])
@@ -43,7 +43,7 @@ model Projeto {
   setupCompleted           Boolean           @default(false)
   currentSetupStep         Int               @default(0)
   createdAt                DateTime          @default(now())
-  updatedAt                DateTime
+  updatedAt                DateTime          @updatedAt
   KeywordResearch          KeywordResearch[]
   User                     User              @relation(fields: [userId], references: [id], onDelete: Cascade)
 
