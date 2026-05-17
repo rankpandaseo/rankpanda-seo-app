@@ -4,6 +4,7 @@ import { useActionData, Form, useNavigation, useSearchParams } from '@remix-run/
 import { getSession, commitSession } from '~/lib/session.server';
 import { verifyPassword } from '~/lib/auth.server';
 import { db } from '~/lib/db.server';
+import { FormField, colors, spacing } from '~/design-system';
 
 export const loader: LoaderFunction = async ({ request }) => {
   const session = await getSession(request.headers.get('Cookie'));
@@ -94,101 +95,145 @@ export default function LoginPage() {
   const accessDenied = searchParams.get('error') === 'access_denied';
 
   return (
-    <div style={{ padding: '2rem', maxWidth: '600px', margin: '0 auto' }}>
-      <h1>Login</h1>
+    <div
+      style={{
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        minHeight: '100vh',
+        backgroundColor: colors.gray100,
+        padding: spacing.lg,
+      }}
+    >
+      <div
+        style={{
+          backgroundColor: colors.white,
+          borderRadius: '8px',
+          boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
+          padding: spacing.xl,
+          width: '100%',
+          maxWidth: '400px',
+        }}
+      >
+        <h1
+          style={{
+            margin: 0,
+            marginBottom: spacing.lg,
+            fontSize: '24px',
+            fontWeight: 600,
+            color: colors.gray900,
+            textAlign: 'center',
+          }}
+        >
+          Login
+        </h1>
 
-      {accessDenied && (
-        <div style={{
-          padding: '0.75rem',
-          backgroundColor: '#fdd',
-          borderLeft: '4px solid #c00',
-          color: '#c00',
-          marginBottom: '1rem'
-        }}>
-          A tua sessão expirou. Por favor, entra novamente.
-        </div>
-      )}
-
-      <Form method="POST" style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-        <div>
-          <label htmlFor="email" style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 'bold' }}>
-            Email
-          </label>
-          <input
-            id="email"
-            type="email"
-            name="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            autoComplete="email"
-            disabled={isSubmitting}
-            required
+        {accessDenied && (
+          <div
             style={{
-              width: '100%',
-              padding: '0.5rem',
-              border: '1px solid #ccc',
+              padding: spacing.md,
+              backgroundColor: '#FFF3E0',
+              borderLeft: `4px solid ${colors.warning}`,
+              color: colors.warning,
+              marginBottom: spacing.lg,
               borderRadius: '4px',
-              fontSize: '1rem',
+              fontSize: '14px',
             }}
-          />
-        </div>
-
-        <div>
-          <label htmlFor="password" style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 'bold' }}>
-            Password
-          </label>
-          <input
-            id="password"
-            type="password"
-            name="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            autoComplete="current-password"
-            disabled={isSubmitting}
-            required
-            style={{
-              width: '100%',
-              padding: '0.5rem',
-              border: '1px solid #ccc',
-              borderRadius: '4px',
-              fontSize: '1rem',
-            }}
-          />
-        </div>
-
-        {actionData?.error && (
-          <div style={{
-            padding: '0.75rem',
-            backgroundColor: '#fdd',
-            borderLeft: '4px solid #c00',
-            color: '#c00'
-          }}>
-            {actionData.error}
+          >
+            A tua sessão expirou. Por favor, entra novamente.
           </div>
         )}
 
-        <button
-          type="submit"
-          disabled={isSubmitting}
-          style={{
-            padding: '0.75rem 1rem',
-            backgroundColor: '#0071e3',
-            color: 'white',
-            border: 'none',
-            borderRadius: '4px',
-            fontSize: '1rem',
-            fontWeight: 'bold',
-            cursor: isSubmitting ? 'not-allowed' : 'pointer',
-            opacity: isSubmitting ? 0.6 : 1,
-          }}
-        >
-          {isSubmitting ? 'A entrar...' : 'Entrar'}
-        </button>
+        <Form method="POST" style={{ display: 'flex', flexDirection: 'column', gap: '0' }}>
+          <FormField
+            label="Email"
+            name="email"
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+            disabled={isSubmitting}
+            autoComplete="email"
+          />
 
-        <p style={{ textAlign: 'center', fontSize: '0.9rem', color: '#666' }}>
-          Não tens conta? <a href="/auth/signup" style={{ color: '#0071e3', textDecoration: 'none' }}>Regista-te aqui</a>
-        </p>
-      </Form>
+          <FormField
+            label="Password"
+            name="password"
+            type="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+            disabled={isSubmitting}
+            autoComplete="current-password"
+          />
+
+          {actionData?.error && (
+            <div
+              style={{
+                padding: spacing.md,
+                backgroundColor: '#FFEBEE',
+                borderLeft: `4px solid ${colors.critical}`,
+                color: colors.critical,
+                marginBottom: spacing.lg,
+                borderRadius: '4px',
+                fontSize: '14px',
+              }}
+            >
+              {actionData.error}
+            </div>
+          )}
+
+          <button
+            type="submit"
+            disabled={isSubmitting}
+            style={{
+              padding: `${spacing.sm} ${spacing.md}`,
+              marginTop: spacing.md,
+              backgroundColor: colors.primary,
+              color: colors.white,
+              border: 'none',
+              borderRadius: '4px',
+              fontSize: '14px',
+              fontWeight: 600,
+              cursor: isSubmitting ? 'not-allowed' : 'pointer',
+              opacity: isSubmitting ? 0.7 : 1,
+              transition: 'all 200ms ease',
+            }}
+            onMouseEnter={(e) => {
+              if (!isSubmitting) {
+                e.currentTarget.style.backgroundColor = colors.primaryDark;
+              }
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.backgroundColor = colors.primary;
+            }}
+          >
+            {isSubmitting ? 'A entrar...' : 'Entrar'}
+          </button>
+
+          <p
+            style={{
+              textAlign: 'center',
+              fontSize: '14px',
+              color: colors.gray700,
+              marginTop: spacing.lg,
+              margin: `${spacing.lg} 0 0 0`,
+            }}
+          >
+            Não tens conta?{' '}
+            <a
+              href="/auth/signup"
+              style={{
+                color: colors.primary,
+                textDecoration: 'none',
+                fontWeight: 600,
+              }}
+            >
+              Regista-te aqui
+            </a>
+          </p>
+        </Form>
+      </div>
     </div>
   );
 }

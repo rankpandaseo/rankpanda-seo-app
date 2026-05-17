@@ -4,6 +4,7 @@ import { useActionData, Form, useNavigation } from '@remix-run/react';
 import { getSession } from '~/lib/session.server';
 import { hashPassword } from '~/lib/auth.server';
 import { db } from '~/lib/db.server';
+import { FormField, colors, spacing } from '~/design-system';
 
 export const loader: LoaderFunction = async ({ request }) => {
   const session = await getSession(request.headers.get('Cookie'));
@@ -87,122 +88,204 @@ export default function SignupPage() {
 
   if (actionData?.success) {
     return (
-      <div style={{ padding: '2rem', maxWidth: '600px', margin: '0 auto' }}>
-        <h1>Conta criada com sucesso!</h1>
-        <p>Um email de confirmação foi enviado. Por favor, aguarde a aprovação do administrador.</p>
-        <p>A tua conta foi criada e está em análise. Um administrador aprovará o teu acesso em breve.</p>
-        <a href="/auth/login" style={{ color: '#0071e3', textDecoration: 'none', fontWeight: 'bold', fontSize: '1rem', padding: '0.5rem 1rem', display: 'inline-block' }}>
-          Ir para Login
-        </a>
+      <div
+        style={{
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          minHeight: '100vh',
+          backgroundColor: colors.gray100,
+          padding: spacing.lg,
+        }}
+      >
+        <div
+          style={{
+            backgroundColor: colors.white,
+            borderRadius: '8px',
+            boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
+            padding: spacing.xl,
+            width: '100%',
+            maxWidth: '400px',
+            textAlign: 'center',
+          }}
+        >
+          <h1
+            style={{
+              margin: 0,
+              marginBottom: spacing.md,
+              fontSize: '24px',
+              fontWeight: 600,
+              color: colors.gray900,
+            }}
+          >
+            Conta criada com sucesso!
+          </h1>
+          <p
+            style={{
+              color: colors.gray700,
+              marginBottom: spacing.md,
+              fontSize: '14px',
+            }}
+          >
+            A tua conta foi criada e está em análise. Um administrador aprovará o teu acesso em breve.
+          </p>
+          <a
+            href="/auth/login"
+            style={{
+              display: 'inline-block',
+              padding: `${spacing.sm} ${spacing.md}`,
+              backgroundColor: colors.primary,
+              color: colors.white,
+              textDecoration: 'none',
+              fontWeight: 600,
+              fontSize: '14px',
+              borderRadius: '4px',
+              marginTop: spacing.lg,
+            }}
+          >
+            Ir para Login
+          </a>
+        </div>
       </div>
     );
   }
 
   return (
-    <div style={{ padding: '2rem', maxWidth: '600px', margin: '0 auto' }}>
-      <h1>Criar Conta</h1>
-
-      <Form method="POST" style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-        <div>
-          <label htmlFor="email" style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 'bold' }}>
-            Email
-          </label>
-          <input
-            id="email"
-            type="email"
-            name="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            autoComplete="email"
-            disabled={isSubmitting}
-            required
-            style={{
-              width: '100%',
-              padding: '0.5rem',
-              border: '1px solid #ccc',
-              borderRadius: '4px',
-              fontSize: '1rem',
-            }}
-          />
-        </div>
-
-        <div>
-          <label htmlFor="password" style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 'bold' }}>
-            Password
-          </label>
-          <input
-            id="password"
-            type="password"
-            name="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            autoComplete="new-password"
-            disabled={isSubmitting}
-            required
-            style={{
-              width: '100%',
-              padding: '0.5rem',
-              border: '1px solid #ccc',
-              borderRadius: '4px',
-              fontSize: '1rem',
-            }}
-          />
-          <small style={{ display: 'block', marginTop: '0.25rem', color: '#666' }}>
-            Mínimo 8 caracteres
-          </small>
-        </div>
-
-        <div>
-          <label htmlFor="confirmPassword" style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 'bold' }}>
-            Confirmar Password
-          </label>
-          <input
-            id="confirmPassword"
-            type="password"
-            name="confirmPassword"
-            value={confirmPassword}
-            onChange={(e) => setConfirmPassword(e.target.value)}
-            autoComplete="new-password"
-            disabled={isSubmitting}
-            required
-            style={{
-              width: '100%',
-              padding: '0.5rem',
-              border: '1px solid #ccc',
-              borderRadius: '4px',
-              fontSize: '1rem',
-            }}
-          />
-        </div>
-
-        {actionData?.error && (
-          <div style={{ padding: '0.75rem', backgroundColor: '#fdd', borderLeft: '4px solid #c00', color: '#c00' }}>
-            {actionData.error}
-          </div>
-        )}
-
-        <button
-          type="submit"
-          disabled={isSubmitting}
+    <div
+      style={{
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        minHeight: '100vh',
+        backgroundColor: colors.gray100,
+        padding: spacing.lg,
+      }}
+    >
+      <div
+        style={{
+          backgroundColor: colors.white,
+          borderRadius: '8px',
+          boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
+          padding: spacing.xl,
+          width: '100%',
+          maxWidth: '400px',
+        }}
+      >
+        <h1
           style={{
-            padding: '0.75rem 1rem',
-            backgroundColor: '#0071e3',
-            color: 'white',
-            border: 'none',
-            borderRadius: '4px',
-            fontSize: '1rem',
-            fontWeight: 'bold',
-            cursor: isSubmitting ? 'not-allowed' : 'pointer',
-            opacity: isSubmitting ? 0.6 : 1,
+            margin: 0,
+            marginBottom: spacing.lg,
+            fontSize: '24px',
+            fontWeight: 600,
+            color: colors.gray900,
+            textAlign: 'center',
           }}
         >
-          {isSubmitting ? 'A criar conta...' : 'Criar Conta'}
-        </button>
+          Criar Conta
+        </h1>
 
-        <p style={{ textAlign: 'center', fontSize: '0.9rem', color: '#666' }}>
-          Já tens conta? <a href="/auth/login" style={{ color: '#0071e3', textDecoration: 'none' }}>Entra aqui</a>
-        </p>
-      </Form>
+        <Form method="POST" style={{ display: 'flex', flexDirection: 'column', gap: '0' }}>
+          <FormField
+            label="Email"
+            name="email"
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+            disabled={isSubmitting}
+            autoComplete="email"
+          />
+
+          <FormField
+            label="Password"
+            name="password"
+            type="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+            disabled={isSubmitting}
+            autoComplete="new-password"
+            helpText="Mínimo 8 caracteres"
+          />
+
+          <FormField
+            label="Confirmar Password"
+            name="confirmPassword"
+            type="password"
+            value={confirmPassword}
+            onChange={(e) => setConfirmPassword(e.target.value)}
+            required
+            disabled={isSubmitting}
+            autoComplete="new-password"
+          />
+
+          {actionData?.error && (
+            <div
+              style={{
+                padding: spacing.md,
+                backgroundColor: '#FFEBEE',
+                borderLeft: `4px solid ${colors.critical}`,
+                color: colors.critical,
+                marginBottom: spacing.lg,
+                borderRadius: '4px',
+                fontSize: '14px',
+              }}
+            >
+              {actionData.error}
+            </div>
+          )}
+
+          <button
+            type="submit"
+            disabled={isSubmitting}
+            style={{
+              padding: `${spacing.sm} ${spacing.md}`,
+              marginTop: spacing.md,
+              backgroundColor: colors.primary,
+              color: colors.white,
+              border: 'none',
+              borderRadius: '4px',
+              fontSize: '14px',
+              fontWeight: 600,
+              cursor: isSubmitting ? 'not-allowed' : 'pointer',
+              opacity: isSubmitting ? 0.7 : 1,
+              transition: 'all 200ms ease',
+            }}
+            onMouseEnter={(e) => {
+              if (!isSubmitting) {
+                e.currentTarget.style.backgroundColor = colors.primaryDark;
+              }
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.backgroundColor = colors.primary;
+            }}
+          >
+            {isSubmitting ? 'A criar conta...' : 'Criar Conta'}
+          </button>
+
+          <p
+            style={{
+              textAlign: 'center',
+              fontSize: '14px',
+              color: colors.gray700,
+              marginTop: spacing.lg,
+              margin: `${spacing.lg} 0 0 0`,
+            }}
+          >
+            Já tens conta?{' '}
+            <a
+              href="/auth/login"
+              style={{
+                color: colors.primary,
+                textDecoration: 'none',
+                fontWeight: 600,
+              }}
+            >
+              Entra aqui
+            </a>
+          </p>
+        </Form>
+      </div>
     </div>
   );
 }
