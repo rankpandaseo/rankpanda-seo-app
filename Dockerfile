@@ -33,8 +33,30 @@ COPY --from=builder /app/prisma ./prisma
 # Generate Prisma Client for production
 RUN npx prisma generate
 
-# Copy entrypoint script
-COPY docker-entrypoint.sh /app/docker-entrypoint.sh
+# Create entrypoint script
+RUN cat > /app/docker-entrypoint.sh << 'ENTRYPOINT_EOF'
+#!/bin/bash
+set -e
+
+echo "[entrypoint] Waiting for PostgreSQL..."
+max_attempts=30
+attempt=0
+until node -e "require('net').createConnection({host: 'postgres', port: 5432}, () => process.exit(0)).on('error', () => process.exit(1))" || [ $attempt -ge $max_attempts ]; do
+  attempt=$((attempt+1))
+  echo "PostgreSQL not ready (attempt $attempt/$max_attempts), retrying..."
+  sleep 2
+done
+
+echo "[entrypoint] PostgreSQL is ready"
+echo "[entrypoint] Syncing database schema..."
+npx prisma db push || echo "Database already synced (continuing...)"
+
+echo "[entrypoint] Seeding database (if needed)..."
+npm run db:seed || echo "Admin user already exists"
+
+echo "[entrypoint] Starting application..."
+exec npm start
+ENTRYPOINT_EOF
 RUN chmod +x /app/docker-entrypoint.sh
 
 # Health check
