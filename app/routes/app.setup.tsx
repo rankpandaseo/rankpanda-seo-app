@@ -1,7 +1,9 @@
+import { useState } from 'react';
 import { redirect, json, type LoaderFunctionArgs, type ActionFunction } from '@remix-run/node';
 import { useLoaderData, useActionData, Form } from '@remix-run/react';
 import { getSession } from '~/lib/session.server';
 import { db } from '~/lib/db.server';
+import { colors, spacing } from '~/design-system';
 
 export async function loader({ request }: LoaderFunctionArgs) {
   const session = await getSession(request.headers.get('cookie'));
@@ -84,13 +86,14 @@ export default function SetupPage() {
   const { user, shopifyAccessToken, shopifyShop, shopifyScope, shopifyError } =
     useLoaderData<typeof loader>();
   const actionData = useActionData<typeof action>();
+  const [shopDomain, setShopDomain] = useState('');
 
   const initiateOAuth = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
-    const shopDomain = formData.get('shopDomain') as string;
+    const domain = formData.get('shopDomain') as string;
 
-    if (!shopDomain) {
+    if (!domain) {
       alert('Por favor, insere o domínio da loja Shopify');
       return;
     }
@@ -99,7 +102,7 @@ export default function SetupPage() {
       const response = await fetch('/api/shopify/auth-init', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ shopDomain }),
+        body: JSON.stringify({ shopDomain: domain }),
       });
 
       if (!response.ok) {
@@ -116,65 +119,106 @@ export default function SetupPage() {
   };
 
   return (
-    <div style={{
-      backgroundColor: 'white',
-      borderRadius: '4px',
-      padding: '1.5rem',
-      boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
-      maxWidth: '600px',
-      margin: '0 auto'
-    }}>
-      <h1 style={{ marginTop: 0, marginBottom: '1.5rem' }}>
+    <div
+      style={{
+        backgroundColor: colors.white,
+        borderRadius: '8px',
+        padding: spacing.xl,
+        boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
+        maxWidth: '500px',
+        margin: '0 auto',
+      }}
+    >
+      <h1
+        style={{
+          margin: 0,
+          marginBottom: spacing.lg,
+          fontSize: '24px',
+          fontWeight: 600,
+          color: colors.gray900,
+        }}
+      >
         Configuração da Loja Shopify
       </h1>
 
       {shopifyError && (
-        <div style={{
-          padding: '0.75rem',
-          backgroundColor: '#ffebee',
-          borderRadius: '4px',
-          color: '#c62828',
-          marginBottom: '1.5rem',
-          borderLeft: '4px solid #f44336'
-        }}>
+        <div
+          style={{
+            padding: spacing.md,
+            backgroundColor: '#FFEBEE',
+            borderRadius: '4px',
+            borderLeft: `4px solid ${colors.critical}`,
+            color: colors.critical,
+            marginBottom: spacing.lg,
+            fontSize: '14px',
+          }}
+        >
           Erro: {shopifyError}
         </div>
       )}
 
       {actionData?.error && (
-        <div style={{
-          padding: '0.75rem',
-          backgroundColor: '#ffebee',
-          borderRadius: '4px',
-          color: '#c62828',
-          marginBottom: '1.5rem',
-          borderLeft: '4px solid #f44336'
-        }}>
+        <div
+          style={{
+            padding: spacing.md,
+            backgroundColor: '#FFEBEE',
+            borderRadius: '4px',
+            borderLeft: `4px solid ${colors.critical}`,
+            color: colors.critical,
+            marginBottom: spacing.lg,
+            fontSize: '14px',
+          }}
+        >
           Erro: {actionData.error}
         </div>
       )}
 
       {!shopifyAccessToken ? (
-        <form onSubmit={initiateOAuth} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+        <form
+          onSubmit={initiateOAuth}
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+            gap: spacing.md,
+          }}
+        >
           <div>
-            <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 'bold' }}>
+            <label
+              style={{
+                display: 'block',
+                marginBottom: spacing.sm,
+                fontWeight: 600,
+                fontSize: '14px',
+                color: colors.gray900,
+              }}
+            >
               Domínio da Loja Shopify
             </label>
             <input
               type="text"
               name="shopDomain"
+              value={shopDomain}
+              onChange={(e) => setShopDomain(e.target.value)}
               placeholder="exemplo.myshopify.com"
               required
               style={{
                 width: '100%',
-                padding: '0.5rem',
-                border: '1px solid #ccc',
+                padding: `${spacing.sm} ${spacing.md}`,
+                border: `1px solid ${colors.gray300}`,
                 borderRadius: '4px',
-                fontSize: '0.9rem',
-                boxSizing: 'border-box'
+                fontSize: '14px',
+                boxSizing: 'border-box',
+                fontFamily: 'inherit',
               }}
             />
-            <small style={{ display: 'block', marginTop: '0.25rem', color: '#999' }}>
+            <small
+              style={{
+                display: 'block',
+                marginTop: spacing.xs,
+                color: colors.gray600,
+                fontSize: '12px',
+              }}
+            >
               Insere o domínio completo da tua loja Shopify
             </small>
           </div>
@@ -182,39 +226,88 @@ export default function SetupPage() {
           <button
             type="submit"
             style={{
-              padding: '0.75rem 1rem',
-              backgroundColor: '#0071e3',
-              color: 'white',
+              padding: `${spacing.sm} ${spacing.md}`,
+              backgroundColor: colors.primary,
+              color: colors.white,
               border: 'none',
               borderRadius: '4px',
               cursor: 'pointer',
-              fontSize: '0.9rem',
-              fontWeight: 'bold'
+              fontSize: '14px',
+              fontWeight: 600,
+              transition: 'all 200ms ease',
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.backgroundColor = colors.primaryDark;
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.backgroundColor = colors.primary;
             }}
           >
             Conectar Shopify
           </button>
         </form>
       ) : (
-        <Form method="post" style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+        <Form
+          method="post"
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+            gap: spacing.md,
+          }}
+        >
           <input type="hidden" name="_action" value="createProject" />
           <input type="hidden" name="shopifyAccessToken" value={shopifyAccessToken} />
           <input type="hidden" name="shopDomain" value={shopifyShop || ''} />
 
-          <div style={{ padding: '1rem', backgroundColor: '#e8f5e9', borderRadius: '4px', borderLeft: '4px solid #4CAF50' }}>
-            <p style={{ margin: '0 0 0.5rem 0', fontWeight: 'bold', color: '#2e7d32' }}>
-              ✅ Conectado com sucesso!
+          <div
+            style={{
+              padding: spacing.md,
+              backgroundColor: '#E8F5E9',
+              borderRadius: '4px',
+              borderLeft: `4px solid ${colors.success}`,
+            }}
+          >
+            <p
+              style={{
+                margin: 0,
+                marginBottom: spacing.sm,
+                fontWeight: 600,
+                fontSize: '14px',
+                color: colors.success,
+              }}
+            >
+              Conectado com sucesso!
             </p>
-            <p style={{ margin: 0, fontSize: '0.9rem', color: '#555' }}>
+            <p
+              style={{
+                margin: 0,
+                fontSize: '14px',
+                color: colors.gray700,
+              }}
+            >
               Loja: <strong>{shopifyShop}</strong>
             </p>
-            <p style={{ margin: '0.5rem 0 0 0', fontSize: '0.85rem', color: '#666' }}>
+            <p
+              style={{
+                margin: `${spacing.sm} 0 0 0`,
+                fontSize: '12px',
+                color: colors.gray600,
+              }}
+            >
               Scope: {shopifyScope}
             </p>
           </div>
 
           <div>
-            <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 'bold' }}>
+            <label
+              style={{
+                display: 'block',
+                marginBottom: spacing.sm,
+                fontWeight: 600,
+                fontSize: '14px',
+                color: colors.gray900,
+              }}
+            >
               Nome do Projeto
             </label>
             <input
@@ -224,11 +317,12 @@ export default function SetupPage() {
               required
               style={{
                 width: '100%',
-                padding: '0.5rem',
-                border: '1px solid #ccc',
+                padding: `${spacing.sm} ${spacing.md}`,
+                border: `1px solid ${colors.gray300}`,
                 borderRadius: '4px',
-                fontSize: '0.9rem',
-                boxSizing: 'border-box'
+                fontSize: '14px',
+                boxSizing: 'border-box',
+                fontFamily: 'inherit',
               }}
             />
           </div>
@@ -236,23 +330,41 @@ export default function SetupPage() {
           <button
             type="submit"
             style={{
-              padding: '0.75rem 1rem',
-              backgroundColor: '#4CAF50',
-              color: 'white',
+              padding: `${spacing.sm} ${spacing.md}`,
+              backgroundColor: colors.success,
+              color: colors.white,
               border: 'none',
               borderRadius: '4px',
               cursor: 'pointer',
-              fontSize: '0.9rem',
-              fontWeight: 'bold'
+              fontSize: '14px',
+              fontWeight: 600,
+              transition: 'all 200ms ease',
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.backgroundColor = '#388E3C';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.backgroundColor = colors.success;
             }}
           >
             Criar Projeto
           </button>
 
-          <p style={{ textAlign: 'center', fontSize: '0.85rem', color: '#999', margin: '1rem 0 0 0' }}>
+          <p
+            style={{
+              textAlign: 'center',
+              fontSize: '12px',
+              color: colors.gray600,
+              margin: `${spacing.lg} 0 0 0`,
+            }}
+          >
             <a
               href="/app/setup"
-              style={{ color: '#0071e3', textDecoration: 'none' }}
+              style={{
+                color: colors.primary,
+                textDecoration: 'none',
+                fontWeight: 600,
+              }}
             >
               Conectar outra loja
             </a>

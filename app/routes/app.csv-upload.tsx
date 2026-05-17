@@ -2,6 +2,7 @@ import { redirect, json, type LoaderFunctionArgs, type ActionFunction } from '@r
 import { useLoaderData, Form, useActionData } from '@remix-run/react';
 import { getSession } from '~/lib/session.server';
 import { db } from '~/lib/db.server';
+import { colors, spacing } from '~/design-system';
 
 export async function loader({ request }: LoaderFunctionArgs) {
   const session = await getSession(request.headers.get('cookie'));
@@ -106,30 +107,88 @@ export default function CSVUploadPage() {
   const actionData = useActionData<typeof action>();
 
   return (
-    <div style={{
-      backgroundColor: 'white',
-      borderRadius: '4px',
-      padding: '1.5rem',
-      boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
-      maxWidth: '600px'
-    }}>
-      <h1 style={{ marginTop: 0, marginBottom: '1.5rem' }}>
+    <div
+      style={{
+        backgroundColor: colors.white,
+        borderRadius: '8px',
+        padding: spacing.xl,
+        boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
+        maxWidth: '500px',
+        margin: '0 auto',
+      }}
+    >
+      <h1
+        style={{
+          margin: 0,
+          marginBottom: spacing.lg,
+          fontSize: '24px',
+          fontWeight: 600,
+          color: colors.gray900,
+        }}
+      >
         Import de Keywords via CSV
       </h1>
 
-      <div style={{ marginBottom: '1.5rem', padding: '1rem', backgroundColor: '#e3f2fd', borderRadius: '4px', borderLeft: '4px solid #0071e3' }}>
-        <p style={{ margin: '0 0 0.5rem 0', fontWeight: 'bold', color: '#0071e3' }}>Formato do CSV:</p>
-        <p style={{ margin: 0, fontSize: '0.85rem', fontFamily: 'monospace', color: '#01579b' }}>
+      <div
+        style={{
+          marginBottom: spacing.lg,
+          padding: spacing.md,
+          backgroundColor: '#E3F2FD',
+          borderRadius: '4px',
+          borderLeft: `4px solid ${colors.primary}`,
+        }}
+      >
+        <p
+          style={{
+            margin: 0,
+            marginBottom: spacing.sm,
+            fontWeight: 600,
+            fontSize: '14px',
+            color: colors.primary,
+          }}
+        >
+          Formato do CSV:
+        </p>
+        <p
+          style={{
+            margin: 0,
+            fontSize: '12px',
+            fontFamily: 'monospace',
+            color: colors.gray700,
+          }}
+        >
           keyword,searchVolume,intent
         </p>
-        <p style={{ margin: '0.5rem 0 0 0', fontSize: '0.85rem', color: '#555' }}>
+        <p
+          style={{
+            margin: `${spacing.sm} 0 0 0`,
+            fontSize: '12px',
+            color: colors.gray600,
+          }}
+        >
           Exemplo: pilha vibrador,1200,commercial
         </p>
       </div>
 
-      <Form method="post" encType="multipart/form-data" style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+      <Form
+        method="post"
+        encType="multipart/form-data"
+        style={{
+          display: 'flex',
+          flexDirection: 'column',
+          gap: spacing.md,
+        }}
+      >
         <div>
-          <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 'bold' }}>
+          <label
+            style={{
+              display: 'block',
+              marginBottom: spacing.sm,
+              fontWeight: 600,
+              fontSize: '14px',
+              color: colors.gray900,
+            }}
+          >
             Projeto
           </label>
           <select
@@ -137,11 +196,12 @@ export default function CSVUploadPage() {
             required
             style={{
               width: '100%',
-              padding: '0.5rem',
-              border: '1px solid #ccc',
+              padding: `${spacing.sm} ${spacing.md}`,
+              border: `1px solid ${colors.gray300}`,
               borderRadius: '4px',
-              fontSize: '0.9rem',
-              boxSizing: 'border-box'
+              fontSize: '14px',
+              boxSizing: 'border-box',
+              fontFamily: 'inherit',
             }}
           >
             <option value="">Seleciona um projeto...</option>
@@ -154,7 +214,15 @@ export default function CSVUploadPage() {
         </div>
 
         <div>
-          <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 'bold' }}>
+          <label
+            style={{
+              display: 'block',
+              marginBottom: spacing.sm,
+              fontWeight: 600,
+              fontSize: '14px',
+              color: colors.gray900,
+            }}
+          >
             Ficheiro CSV
           </label>
           <input
@@ -164,15 +232,21 @@ export default function CSVUploadPage() {
             required
             style={{
               width: '100%',
-              padding: '0.5rem',
-              border: '2px dashed #ccc',
+              padding: `${spacing.sm} ${spacing.md}`,
+              border: `2px dashed ${colors.gray300}`,
               borderRadius: '4px',
               cursor: 'pointer',
-              fontSize: '0.9rem',
-              boxSizing: 'border-box'
+              fontSize: '14px',
+              boxSizing: 'border-box',
             }}
           />
-          <p style={{ margin: '0.5rem 0 0 0', fontSize: '0.8rem', color: '#999' }}>
+          <p
+            style={{
+              margin: `${spacing.sm} 0 0 0`,
+              fontSize: '12px',
+              color: colors.gray600,
+            }}
+          >
             Apenas ficheiros CSV permitidos
           </p>
         </div>
@@ -180,14 +254,21 @@ export default function CSVUploadPage() {
         <button
           type="submit"
           style={{
-            padding: '0.75rem 1rem',
-            backgroundColor: '#4CAF50',
-            color: 'white',
+            padding: `${spacing.sm} ${spacing.md}`,
+            backgroundColor: colors.success,
+            color: colors.white,
             border: 'none',
             borderRadius: '4px',
             cursor: 'pointer',
-            fontSize: '0.9rem',
-            fontWeight: 'bold'
+            fontSize: '14px',
+            fontWeight: 600,
+            transition: 'all 200ms ease',
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.backgroundColor = '#388E3C';
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.backgroundColor = colors.success;
           }}
         >
           Importar Keywords
@@ -195,17 +276,58 @@ export default function CSVUploadPage() {
       </Form>
 
       {actionData?.success && (
-        <div style={{ marginTop: '1rem', padding: '0.75rem', backgroundColor: '#e8f5e9', borderRadius: '4px', color: '#2e7d32', borderLeft: '4px solid #4CAF50' }}>
-          <p style={{ margin: '0 0 0.5rem 0', fontWeight: 'bold' }}>✅ Import bem-sucedido!</p>
-          <p style={{ margin: 0, fontSize: '0.9rem' }}>
+        <div
+          style={{
+            marginTop: spacing.lg,
+            padding: spacing.md,
+            backgroundColor: '#E8F5E9',
+            borderRadius: '4px',
+            borderLeft: `4px solid ${colors.success}`,
+          }}
+        >
+          <p
+            style={{
+              margin: 0,
+              marginBottom: spacing.sm,
+              fontWeight: 600,
+              fontSize: '14px',
+              color: colors.success,
+            }}
+          >
+            Import bem-sucedido!
+          </p>
+          <p
+            style={{
+              margin: 0,
+              fontSize: '14px',
+              color: colors.gray700,
+            }}
+          >
             {actionData.message}
           </p>
         </div>
       )}
 
       {actionData?.error && (
-        <div style={{ marginTop: '1rem', padding: '0.75rem', backgroundColor: '#ffebee', borderRadius: '4px', color: '#c62828', borderLeft: '4px solid #f44336' }}>
-          <p style={{ margin: 0, fontWeight: 'bold' }}>❌ {actionData.error}</p>
+        <div
+          style={{
+            marginTop: spacing.lg,
+            padding: spacing.md,
+            backgroundColor: '#FFEBEE',
+            borderRadius: '4px',
+            borderLeft: `4px solid ${colors.critical}`,
+          }}
+        >
+          <p
+            style={{
+              margin: 0,
+              fontWeight: 600,
+              fontSize: '14px',
+              color: colors.critical,
+            }}
+          >
+            {actionData.error}
+          </p>
         </div>
       )}
     </div>

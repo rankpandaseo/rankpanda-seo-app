@@ -2,6 +2,7 @@ import { redirect, json, type LoaderFunctionArgs, type ActionFunction } from '@r
 import { useLoaderData, useOutletContext } from '@remix-run/react';
 import { getSession } from '~/lib/session.server';
 import { db } from '~/lib/db.server';
+import { colors, spacing, StatusBadge } from '~/design-system';
 
 export async function loader({ request }: LoaderFunctionArgs) {
   const session = await getSession(request.headers.get('cookie'));
@@ -90,122 +91,213 @@ export default function AdminUsersPage() {
 
   if (user.role !== 'admin') {
     return (
-      <div style={{
-        backgroundColor: 'white',
-        borderRadius: '4px',
-        padding: '1.5rem',
-        boxShadow: '0 1px 3px rgba(0,0,0,0.1)'
-      }}>
-        <p style={{ color: '#666' }}>
+      <div
+        style={{
+          backgroundColor: colors.white,
+          borderRadius: '8px',
+          padding: spacing.xl,
+          boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
+        }}
+      >
+        <p style={{ color: colors.gray700, margin: 0 }}>
           Não tens permissão para aceder a esta página.
         </p>
       </div>
     );
   }
 
-  const getStatusColor = (status: string) => {
-    if (status === 'active') return '#4CAF50';
-    if (status === 'pending') return '#ff9800';
-    return '#f44336';
+  const handleApprove = (userId: string) => {
+    const reason = prompt('Motivo da aprovação (opcional):');
+    const form = document.createElement('form');
+    form.method = 'POST';
+    form.innerHTML = `
+      <input type="hidden" name="action" value="approve" />
+      <input type="hidden" name="userId" value="${userId}" />
+      <input type="hidden" name="reason" value="${reason || ''}" />
+    `;
+    document.body.appendChild(form);
+    form.submit();
+  };
+
+  const handleReject = (userId: string) => {
+    const reason = prompt('Motivo da rejeição:');
+    if (!reason) return;
+    const form = document.createElement('form');
+    form.method = 'POST';
+    form.innerHTML = `
+      <input type="hidden" name="action" value="reject" />
+      <input type="hidden" name="userId" value="${userId}" />
+      <input type="hidden" name="reason" value="${reason}" />
+    `;
+    document.body.appendChild(form);
+    form.submit();
+  };
+
+  const handleBan = (userId: string) => {
+    if (confirm('Tens a certeza que queres banir este utilizador?')) {
+      const form = document.createElement('form');
+      form.method = 'POST';
+      form.innerHTML = `
+        <input type="hidden" name="action" value="ban" />
+        <input type="hidden" name="userId" value="${userId}" />
+        <input type="hidden" name="reason" value="Banido pelo admin" />
+      `;
+      document.body.appendChild(form);
+      form.submit();
+    }
   };
 
   return (
-    <div style={{
-      backgroundColor: 'white',
-      borderRadius: '4px',
-      padding: '1.5rem',
-      boxShadow: '0 1px 3px rgba(0,0,0,0.1)'
-    }}>
-      <h1 style={{ marginTop: 0, marginBottom: '1.5rem' }}>
+    <div
+      style={{
+        backgroundColor: colors.white,
+        borderRadius: '8px',
+        padding: spacing.xl,
+        boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
+      }}
+    >
+      <h1
+        style={{
+          margin: 0,
+          marginBottom: spacing.lg,
+          fontSize: '24px',
+          fontWeight: 600,
+          color: colors.gray900,
+        }}
+      >
         Gestão de Utilizadores
       </h1>
 
       <div style={{ overflowX: 'auto' }}>
-        <table style={{
-          width: '100%',
-          borderCollapse: 'collapse',
-          fontSize: '0.875rem'
-        }}>
+        <table
+          style={{
+            width: '100%',
+            borderCollapse: 'collapse',
+            fontSize: '14px',
+          }}
+        >
           <thead>
-            <tr style={{ borderBottom: '2px solid #ddd', backgroundColor: '#f9f9f9' }}>
-              <th style={{ padding: '0.75rem', textAlign: 'left', fontWeight: 'bold' }}>Email</th>
-              <th style={{ padding: '0.75rem', textAlign: 'left', fontWeight: 'bold' }}>Papel</th>
-              <th style={{ padding: '0.75rem', textAlign: 'left', fontWeight: 'bold' }}>Estado</th>
-              <th style={{ padding: '0.75rem', textAlign: 'left', fontWeight: 'bold' }}>Criado em</th>
-              <th style={{ padding: '0.75rem', textAlign: 'left', fontWeight: 'bold' }}>Ações</th>
+            <tr
+              style={{
+                borderBottom: `2px solid ${colors.gray300}`,
+                backgroundColor: colors.gray100,
+              }}
+            >
+              <th
+                style={{
+                  padding: spacing.md,
+                  textAlign: 'left',
+                  fontWeight: 600,
+                  color: colors.gray900,
+                }}
+              >
+                Email
+              </th>
+              <th
+                style={{
+                  padding: spacing.md,
+                  textAlign: 'left',
+                  fontWeight: 600,
+                  color: colors.gray900,
+                }}
+              >
+                Papel
+              </th>
+              <th
+                style={{
+                  padding: spacing.md,
+                  textAlign: 'left',
+                  fontWeight: 600,
+                  color: colors.gray900,
+                }}
+              >
+                Estado
+              </th>
+              <th
+                style={{
+                  padding: spacing.md,
+                  textAlign: 'left',
+                  fontWeight: 600,
+                  color: colors.gray900,
+                }}
+              >
+                Criado em
+              </th>
+              <th
+                style={{
+                  padding: spacing.md,
+                  textAlign: 'left',
+                  fontWeight: 600,
+                  color: colors.gray900,
+                }}
+              >
+                Ações
+              </th>
             </tr>
           </thead>
           <tbody>
             {users.map((u: any) => (
-              <tr key={u.id} style={{ borderBottom: '1px solid #eee' }}>
-                <td style={{ padding: '0.75rem' }}>{u.email}</td>
-                <td style={{ padding: '0.75rem' }}>{u.role}</td>
-                <td style={{ padding: '0.75rem' }}>
-                  <span style={{
-                    display: 'inline-block',
-                    padding: '0.25rem 0.75rem',
-                    borderRadius: '12px',
-                    backgroundColor: getStatusColor(u.status),
-                    color: 'white',
-                    fontSize: '0.75rem',
-                    fontWeight: 'bold'
-                  }}>
-                    {u.status}
-                  </span>
+              <tr
+                key={u.id}
+                style={{
+                  borderBottom: `1px solid ${colors.gray300}`,
+                }}
+              >
+                <td style={{ padding: spacing.md, color: colors.gray700 }}>{u.email}</td>
+                <td style={{ padding: spacing.md, color: colors.gray700 }}>
+                  {u.role === 'admin' ? 'Administrador' : 'Utilizador'}
                 </td>
-                <td style={{ padding: '0.75rem' }}>
+                <td style={{ padding: spacing.md }}>
+                  <StatusBadge status={u.status}>
+                    {u.status === 'active' ? 'Ativo' : u.status === 'pending' ? 'Pendente' : 'Bloqueado'}
+                  </StatusBadge>
+                </td>
+                <td style={{ padding: spacing.md, color: colors.gray700 }}>
                   {new Date(u.createdAt).toLocaleDateString('pt-PT')}
                 </td>
-                <td style={{ padding: '0.75rem' }}>
+                <td style={{ padding: spacing.md }}>
                   {u.status === 'pending' ? (
-                    <div style={{ display: 'flex', gap: '0.5rem' }}>
+                    <div style={{ display: 'flex', gap: spacing.sm }}>
                       <button
-                        onClick={() => {
-                          const reason = prompt('Motivo da aprovação (opcional):');
-                          const form = document.createElement('form');
-                          form.method = 'POST';
-                          form.innerHTML = `
-                            <input type="hidden" name="action" value="approve" />
-                            <input type="hidden" name="userId" value="${u.id}" />
-                            <input type="hidden" name="reason" value="${reason || ''}" />
-                          `;
-                          document.body.appendChild(form);
-                          form.submit();
-                        }}
+                        onClick={() => handleApprove(u.id)}
                         style={{
-                          padding: '0.35rem 0.7rem',
-                          fontSize: '0.75rem',
-                          backgroundColor: '#4CAF50',
-                          color: 'white',
+                          padding: `${spacing.xs} ${spacing.sm}`,
+                          fontSize: '12px',
+                          backgroundColor: colors.success,
+                          color: colors.white,
                           border: 'none',
                           borderRadius: '4px',
-                          cursor: 'pointer'
+                          cursor: 'pointer',
+                          fontWeight: 600,
+                          transition: 'all 200ms ease',
+                        }}
+                        onMouseEnter={(e) => {
+                          e.currentTarget.style.backgroundColor = '#388E3C';
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget.style.backgroundColor = colors.success;
                         }}
                       >
                         Aprovar
                       </button>
                       <button
-                        onClick={() => {
-                          const reason = prompt('Motivo da rejeição:');
-                          if (!reason) return;
-                          const form = document.createElement('form');
-                          form.method = 'POST';
-                          form.innerHTML = `
-                            <input type="hidden" name="action" value="reject" />
-                            <input type="hidden" name="userId" value="${u.id}" />
-                            <input type="hidden" name="reason" value="${reason}" />
-                          `;
-                          document.body.appendChild(form);
-                          form.submit();
-                        }}
+                        onClick={() => handleReject(u.id)}
                         style={{
-                          padding: '0.35rem 0.7rem',
-                          fontSize: '0.75rem',
-                          backgroundColor: '#f44336',
-                          color: 'white',
+                          padding: `${spacing.xs} ${spacing.sm}`,
+                          fontSize: '12px',
+                          backgroundColor: colors.critical,
+                          color: colors.white,
                           border: 'none',
                           borderRadius: '4px',
-                          cursor: 'pointer'
+                          cursor: 'pointer',
+                          fontWeight: 600,
+                          transition: 'all 200ms ease',
+                        }}
+                        onMouseEnter={(e) => {
+                          e.currentTarget.style.backgroundColor = '#D32F2F';
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget.style.backgroundColor = colors.critical;
                         }}
                       >
                         Rejeitar
@@ -213,33 +305,29 @@ export default function AdminUsersPage() {
                     </div>
                   ) : u.status === 'active' ? (
                     <button
-                      onClick={() => {
-                        if (confirm('Tens a certeza que queres banir este utilizador?')) {
-                          const form = document.createElement('form');
-                          form.method = 'POST';
-                          form.innerHTML = `
-                            <input type="hidden" name="action" value="ban" />
-                            <input type="hidden" name="userId" value="${u.id}" />
-                            <input type="hidden" name="reason" value="Banido pelo admin" />
-                          `;
-                          document.body.appendChild(form);
-                          form.submit();
-                        }
-                      }}
+                      onClick={() => handleBan(u.id)}
                       style={{
-                        padding: '0.35rem 0.7rem',
-                        fontSize: '0.75rem',
-                        backgroundColor: '#ff9800',
-                        color: 'white',
+                        padding: `${spacing.xs} ${spacing.sm}`,
+                        fontSize: '12px',
+                        backgroundColor: colors.warning,
+                        color: colors.white,
                         border: 'none',
                         borderRadius: '4px',
-                        cursor: 'pointer'
+                        cursor: 'pointer',
+                        fontWeight: 600,
+                        transition: 'all 200ms ease',
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.backgroundColor = '#F57C00';
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.backgroundColor = colors.warning;
                       }}
                     >
                       Banir
                     </button>
                   ) : (
-                    <span style={{ fontSize: '0.75rem', color: '#999' }}>—</span>
+                    <span style={{ fontSize: '12px', color: colors.gray600 }}>—</span>
                   )}
                 </td>
               </tr>

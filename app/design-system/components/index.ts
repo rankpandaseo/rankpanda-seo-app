@@ -5,6 +5,7 @@
 
 // Layout
 export { AppFrame } from './layout/AppFrame';
+export { AdminFrame } from './layout/AdminFrame';
 
 // Forms
 export { FormField } from './forms/FormField';
