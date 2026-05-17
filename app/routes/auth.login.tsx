@@ -17,8 +17,14 @@ export const loader: LoaderFunction = async ({ request }) => {
       return redirect('/app');
     }
 
-    // If user exists but status is not active, clear the session and show the login form
-    // (the error will be shown via the error parameter)
+    // If user exists but status is not active, or user doesn't exist:
+    // Clear the invalid session to prevent redirect loop
+    session.unset('userId');
+    return json(null, {
+      headers: {
+        'Set-Cookie': await commitSession(session),
+      },
+    });
   }
   return null;
 };
