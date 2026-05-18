@@ -3,7 +3,7 @@ import { useLoaderData, Form, useActionData } from '@remix-run/react';
 import { getSession } from '~/lib/session.server';
 import { db } from '~/lib/db.server';
 import bcryptjs from 'bcryptjs';
-import { colors, spacing } from '~/design-system';
+import { colors, spacing, ErrorAlert, SuccessAlert } from '~/design-system';
 
 export async function loader({ request }: LoaderFunctionArgs) {
   const session = await getSession(request.headers.get('cookie'));
@@ -340,35 +340,9 @@ export default function SettingsPage() {
             Alterar Senha
           </button>
 
-          {actionData?.success && (
-            <div
-              style={{
-                padding: spacing.md,
-                backgroundColor: '#E8F5E9',
-                borderRadius: '4px',
-                borderLeft: `4px solid ${colors.success}`,
-                color: colors.success,
-                fontSize: '14px',
-              }}
-            >
-              {actionData.message}
-            </div>
-          )}
+          {actionData?.success && <SuccessAlert message={actionData.message} />}
 
-          {actionData?.error && (
-            <div
-              style={{
-                padding: spacing.md,
-                backgroundColor: '#FFEBEE',
-                borderRadius: '4px',
-                borderLeft: `4px solid ${colors.critical}`,
-                color: colors.critical,
-                fontSize: '14px',
-              }}
-            >
-              {actionData.error}
-            </div>
-          )}
+          {actionData?.error && <ErrorAlert message={actionData.error} />}
         </Form>
       </div>
     </div>

@@ -3,7 +3,7 @@ import { redirect, json, type LoaderFunctionArgs, type ActionFunction } from '@r
 import { useLoaderData, Form } from '@remix-run/react';
 import { getSession } from '~/lib/session.server';
 import { db } from '~/lib/db.server';
-import { colors, spacing, StatusBadge } from '~/design-system';
+import { colors, spacing, StatusBadge, DataTable, EmptyState } from '~/design-system';
 
 export async function loader({ request }: LoaderFunctionArgs) {
   const session = await getSession(request.headers.get('cookie'));
@@ -156,138 +156,74 @@ export default function ProjetosPage() {
 
       {/* Table or Empty State */}
       {projetos.length === 0 ? (
-        <p
-          style={{
-            color: colors.gray700,
-            marginBottom: 0,
-            fontSize: '14px',
-          }}
-        >
-          Nenhum projeto criado ainda. Preenche o formulário acima para começar.
-        </p>
+        <EmptyState
+          title="Nenhum projeto criado ainda"
+          description="Preenche o formulário acima para criar o teu primeiro projeto e começar a gerenciar keywords."
+        />
       ) : (
-        <div style={{ overflowX: 'auto' }}>
-          <table
-            style={{
-              width: '100%',
-              borderCollapse: 'collapse',
-              fontSize: '14px',
-            }}
-          >
-            <thead>
-              <tr
-                style={{
-                  borderBottom: `2px solid ${colors.gray300}`,
-                  backgroundColor: colors.gray100,
-                }}
-              >
-                <th
+        <DataTable
+          columns={[
+            {
+              key: 'shopName' as const,
+              label: 'Nome da Loja',
+              render: (value, row: any) => (
+                <a
+                  href={`/app/projetos/${row.id}`}
                   style={{
-                    padding: spacing.md,
-                    textAlign: 'left',
+                    color: colors.primary,
+                    textDecoration: 'none',
+                    fontWeight: 500,
+                  }}
+                >
+                  {value}
+                </a>
+              ),
+            },
+            {
+              key: 'keywords' as const,
+              label: 'Keywords',
+              render: (_value, row: any) => row.keywords?.length || 0,
+            },
+            {
+              key: 'setupCompleted' as const,
+              label: 'Status',
+              render: (value) => (
+                <StatusBadge status={value ? 'active' : 'pending'}>
+                  {value ? 'Completo' : 'Em Progresso'}
+                </StatusBadge>
+              ),
+            },
+            {
+              key: 'createdAt' as const,
+              label: 'Criado em',
+              render: (value) => new Date(value).toLocaleDateString('pt-PT'),
+            },
+            {
+              key: 'id' as const,
+              label: 'Ações',
+              render: (value) => (
+                <a
+                  href={`/app/projetos/${value}`}
+                  style={{
+                    padding: `${spacing.xs} ${spacing.sm}`,
+                    backgroundColor: colors.primary,
+                    color: colors.white,
+                    border: 'none',
+                    borderRadius: '4px',
+                    cursor: 'pointer',
+                    fontSize: '12px',
+                    textDecoration: 'none',
+                    display: 'inline-block',
                     fontWeight: 600,
-                    color: colors.gray900,
                   }}
                 >
-                  Nome da Loja
-                </th>
-                <th
-                  style={{
-                    padding: spacing.md,
-                    textAlign: 'left',
-                    fontWeight: 600,
-                    color: colors.gray900,
-                  }}
-                >
-                  Keywords
-                </th>
-                <th
-                  style={{
-                    padding: spacing.md,
-                    textAlign: 'left',
-                    fontWeight: 600,
-                    color: colors.gray900,
-                  }}
-                >
-                  Status
-                </th>
-                <th
-                  style={{
-                    padding: spacing.md,
-                    textAlign: 'left',
-                    fontWeight: 600,
-                    color: colors.gray900,
-                  }}
-                >
-                  Criado em
-                </th>
-                <th
-                  style={{
-                    padding: spacing.md,
-                    textAlign: 'left',
-                    fontWeight: 600,
-                    color: colors.gray900,
-                  }}
-                >
-                  Ações
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {projetos.map((p: any) => (
-                <tr
-                  key={p.id}
-                  style={{
-                    borderBottom: `1px solid ${colors.gray300}`,
-                  }}
-                >
-                  <td style={{ padding: spacing.md }}>
-                    <a
-                      href={`/app/projetos/${p.id}`}
-                      style={{
-                        color: colors.primary,
-                        textDecoration: 'none',
-                        fontWeight: 500,
-                      }}
-                    >
-                      {p.shopName}
-                    </a>
-                  </td>
-                  <td style={{ padding: spacing.md, color: colors.gray700 }}>
-                    {p.keywords?.length || 0}
-                  </td>
-                  <td style={{ padding: spacing.md }}>
-                    <StatusBadge status={p.setupCompleted ? 'active' : 'pending'}>
-                      {p.setupCompleted ? 'Completo' : 'Em Progresso'}
-                    </StatusBadge>
-                  </td>
-                  <td style={{ padding: spacing.md, color: colors.gray700 }}>
-                    {new Date(p.createdAt).toLocaleDateString('pt-PT')}
-                  </td>
-                  <td style={{ padding: spacing.md }}>
-                    <a
-                      href={`/app/projetos/${p.id}`}
-                      style={{
-                        padding: `${spacing.xs} ${spacing.sm}`,
-                        backgroundColor: colors.primary,
-                        color: colors.white,
-                        border: 'none',
-                        borderRadius: '4px',
-                        cursor: 'pointer',
-                        fontSize: '12px',
-                        textDecoration: 'none',
-                        display: 'inline-block',
-                        fontWeight: 600,
-                      }}
-                    >
-                      Abrir
-                    </a>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+                  Abrir
+                </a>
+              ),
+            },
+          ]}
+          data={projetos}
+        />
       )}
     </div>
   );

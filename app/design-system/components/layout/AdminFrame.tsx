@@ -1,8 +1,13 @@
 import { colors, spacing } from '~/design-system/tokens';
 
+interface NavItem {
+  label: string;
+  href: string;
+}
+
 interface AdminFrameProps {
   children: React.ReactNode;
-  navItems: Array<{ label: string; href: string }>;
+  navItems: NavItem[];
   activeNav?: string;
 }
 
@@ -11,109 +16,72 @@ export function AdminFrame({ children, navItems, activeNav }: AdminFrameProps) {
     <div
       style={{
         display: 'flex',
-        minHeight: '100vh',
-        backgroundColor: colors.gray100,
+        height: '100vh',
+        backgroundColor: colors.white,
       }}
     >
-      {/* Admin Sidebar - with red accent border */}
+      {/* Sidebar - with red admin accent */}
       <div
         style={{
-          width: '240px',
-          backgroundColor: colors.gray900,
-          color: colors.white,
+          width: '280px',
+          backgroundColor: colors.white,
+          borderRight: `1px solid ${colors.gray300}`,
+          borderLeft: `4px solid ${colors.critical}`,
+          display: 'flex',
+          flexDirection: 'column',
           padding: spacing.lg,
-          borderLeft: `4px solid #D32F2F`,
-          boxShadow: '2px 0 4px rgba(0,0,0,0.1)',
-          overflow: 'auto',
         }}
       >
         <div
           style={{
-            marginBottom: spacing.xl,
+            marginBottom: spacing.lg,
             paddingBottom: spacing.lg,
-            borderBottom: `1px solid ${colors.gray700}`,
+            borderBottom: `1px solid ${colors.gray300}`,
           }}
         >
           <h2
             style={{
               margin: 0,
               fontSize: '18px',
-              fontWeight: 600,
-              color: colors.white,
+              fontWeight: 700,
+              color: colors.critical,
             }}
           >
-            Admin
+            Painel de Administração
           </h2>
-          <p
-            style={{
-              margin: `${spacing.xs} 0 0 0`,
-              fontSize: '12px',
-              color: colors.gray400,
-            }}
-          >
-            Gestão do sistema
-          </p>
         </div>
 
-        <nav style={{ display: 'flex', flexDirection: 'column', gap: spacing.sm }}>
+        <nav style={{ flex: 1 }}>
           {navItems.map((item) => (
             <a
               key={item.href}
               href={item.href}
               style={{
-                padding: `${spacing.sm} ${spacing.md}`,
-                color: activeNav === item.href ? '#D32F2F' : colors.gray300,
-                textDecoration: 'none',
-                fontSize: '14px',
-                fontWeight: activeNav === item.href ? 600 : 400,
-                borderRadius: '4px',
-                backgroundColor: activeNav === item.href ? 'rgba(211, 47, 47, 0.1)' : 'transparent',
-                transition: 'all 200ms ease',
                 display: 'block',
+                padding: `${spacing.md} ${spacing.md}`,
+                color: activeNav?.includes(item.href) ? colors.critical : colors.gray900,
+                textDecoration: 'none',
+                borderRadius: '4px',
+                marginBottom: spacing.sm,
+                backgroundColor: activeNav?.includes(item.href) ? '#FFEBEE' : 'transparent',
+                fontWeight: activeNav?.includes(item.href) ? 600 : 500,
+                transition: 'all 200ms ease',
+                borderLeft: activeNav?.includes(item.href) ? `3px solid ${colors.critical}` : '3px solid transparent',
+                paddingLeft: `calc(${spacing.md} - 3px)`,
               }}
               onMouseEnter={(e) => {
-                e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.1)';
+                e.currentTarget.style.backgroundColor = '#FFEBEE';
               }}
               onMouseLeave={(e) => {
-                e.currentTarget.style.backgroundColor =
-                  activeNav === item.href ? 'rgba(211, 47, 47, 0.1)' : 'transparent';
+                if (!activeNav?.includes(item.href)) {
+                  e.currentTarget.style.backgroundColor = 'transparent';
+                }
               }}
             >
               {item.label}
             </a>
           ))}
         </nav>
-
-        <div
-          style={{
-            marginTop: spacing.xl,
-            paddingTop: spacing.lg,
-            borderTop: `1px solid ${colors.gray700}`,
-          }}
-        >
-          <a
-            href="/app"
-            style={{
-              padding: `${spacing.sm} ${spacing.md}`,
-              color: colors.gray400,
-              textDecoration: 'none',
-              fontSize: '12px',
-              display: 'block',
-              borderRadius: '4px',
-              transition: 'all 200ms ease',
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.1)';
-              e.currentTarget.style.color = colors.white;
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.backgroundColor = 'transparent';
-              e.currentTarget.style.color = colors.gray400;
-            }}
-          >
-            Voltar ao App
-          </a>
-        </div>
       </div>
 
       {/* Main Content */}
@@ -122,36 +90,57 @@ export function AdminFrame({ children, navItems, activeNav }: AdminFrameProps) {
           flex: 1,
           display: 'flex',
           flexDirection: 'column',
+          overflow: 'auto',
         }}
       >
         {/* Header */}
         <div
           style={{
-            backgroundColor: colors.white,
+            padding: spacing.lg,
             borderBottom: `1px solid ${colors.gray300}`,
-            padding: `${spacing.md} ${spacing.lg}`,
-            boxShadow: '0 1px 3px rgba(0,0,0,0.05)',
+            backgroundColor: colors.gray50,
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
           }}
         >
-          <p
+          <h1
             style={{
               margin: 0,
-              fontSize: '12px',
-              color: colors.gray600,
-              fontWeight: 500,
-              textTransform: 'uppercase',
-              letterSpacing: '0.5px',
+              fontSize: '20px',
+              fontWeight: 600,
+              color: colors.gray900,
             }}
           >
-            Painel de Administração
-          </p>
+            RankPanda SEO
+          </h1>
+          <a
+            href="/auth/logout"
+            style={{
+              color: colors.gray700,
+              textDecoration: 'none',
+              fontSize: '14px',
+              fontWeight: 500,
+              padding: `${spacing.sm} ${spacing.md}`,
+              borderRadius: '4px',
+              transition: 'all 200ms ease',
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.backgroundColor = colors.gray200;
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.backgroundColor = 'transparent';
+            }}
+          >
+            Sair
+          </a>
         </div>
 
-        {/* Content Area */}
+        {/* Content */}
         <div
           style={{
             flex: 1,
-            padding: spacing.xl,
+            padding: spacing.lg,
             overflow: 'auto',
           }}
         >

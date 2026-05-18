@@ -1,7 +1,4 @@
-/**
- * Design System Hooks Barrel Export
- * All hooks exported from a single point
- */
-
 export { useToast } from './useToast';
-export type { Toast, ToastContextType } from './useToast';
+export { useModal } from './useModal';
+export { useFormValidation } from './useFormValidation';
+export type { Toast, ToastType, ToastContextType } from './useToast';

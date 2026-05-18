@@ -4,7 +4,7 @@ import { useActionData, Form, useNavigation } from '@remix-run/react';
 import { getSession } from '~/lib/session.server';
 import { hashPassword } from '~/lib/auth.server';
 import { db } from '~/lib/db.server';
-import { FormField, colors, spacing } from '~/design-system';
+import { FormField, ErrorAlert, colors, spacing } from '~/design-system';
 
 export const loader: LoaderFunction = async ({ request }) => {
   const session = await getSession(request.headers.get('Cookie'));
@@ -238,19 +238,7 @@ export default function SignupPage() {
           />
 
           {actionData?.error && (
-            <div
-              style={{
-                padding: spacing.md,
-                backgroundColor: '#FFEBEE',
-                borderLeft: `4px solid ${colors.critical}`,
-                color: colors.critical,
-                marginBottom: spacing.lg,
-                borderRadius: '4px',
-                fontSize: '14px',
-              }}
-            >
-              {actionData.error}
-            </div>
+            <ErrorAlert message={actionData.error} />
           )}
 
           <button

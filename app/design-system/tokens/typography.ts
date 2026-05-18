@@ -1,55 +1,58 @@
 /**
- * Typography Scale — Consistent typography throughout the design system
+ * Typography System — Shopify Polaris
+ * Font sizes, weights, and line heights
  */
 
 export const typography = {
-  // Headings (bold, hierarchical)
-  headingXl: {
+  // Headings
+  headingXL: {
     fontSize: '32px',
     fontWeight: 600,
-    lineHeight: 1.2,
+    lineHeight: '40px',
     letterSpacing: '-0.5px',
   },
   headingLg: {
-    fontSize: '24px',
+    fontSize: '28px',
     fontWeight: 600,
-    lineHeight: 1.3,
-    letterSpacing: '-0.3px',
+    lineHeight: '36px',
   },
   headingMd: {
-    fontSize: '18px',
+    fontSize: '24px',
     fontWeight: 600,
-    lineHeight: 1.4,
-    letterSpacing: '0px',
+    lineHeight: '32px',
   },
   headingSm: {
-    fontSize: '14px',
+    fontSize: '20px',
     fontWeight: 600,
-    lineHeight: 1.5,
-    letterSpacing: '0px',
+    lineHeight: '28px',
+  },
+  headingXs: {
+    fontSize: '16px',
+    fontWeight: 600,
+    lineHeight: '24px',
   },
 
-  // Body text (regular weight)
+  // Body text
   bodyLg: {
     fontSize: '16px',
     fontWeight: 400,
-    lineHeight: 1.5,
-    letterSpacing: '0px',
+    lineHeight: '24px',
   },
   bodySm: {
     fontSize: '14px',
     fontWeight: 400,
-    lineHeight: 1.5,
-    letterSpacing: '0px',
+    lineHeight: '20px',
   },
-
-  // Monospace (for code, IDs, etc.)
-  mono: {
-    fontFamily: 'monospace',
-    fontSize: '13px',
+  bodyXs: {
+    fontSize: '12px',
     fontWeight: 400,
-    lineHeight: 1.5,
+    lineHeight: '16px',
   },
-} as const;
 
-export default typography;
+  // Monospace (for codes, technical text)
+  mono: {
+    fontSize: '13px',
+    fontFamily: '"Monaco", "Courier New", monospace',
+    lineHeight: '20px',
+  },
+};

@@ -4,7 +4,7 @@ import { useActionData, Form, useNavigation, useSearchParams } from '@remix-run/
 import { getSession, commitSession } from '~/lib/session.server';
 import { verifyPassword } from '~/lib/auth.server';
 import { db } from '~/lib/db.server';
-import { FormField, colors, spacing } from '~/design-system';
+import { FormField, ErrorAlert, WarningAlert, colors, spacing } from '~/design-system';
 
 export const loader: LoaderFunction = async ({ request }) => {
   const session = await getSession(request.headers.get('Cookie'));
@@ -150,19 +150,7 @@ export default function LoginPage() {
         </h1>
 
         {accessDenied && (
-          <div
-            style={{
-              padding: spacing.md,
-              backgroundColor: '#FFF3E0',
-              borderLeft: `4px solid ${colors.warning}`,
-              color: colors.warning,
-              marginBottom: spacing.lg,
-              borderRadius: '4px',
-              fontSize: '14px',
-            }}
-          >
-            A tua sessão expirou. Por favor, entra novamente.
-          </div>
+          <WarningAlert message="A tua sessão expirou. Por favor, entra novamente." />
         )}
 
         <Form method="POST" style={{ display: 'flex', flexDirection: 'column', gap: '0' }}>
@@ -188,21 +176,7 @@ export default function LoginPage() {
             autoComplete="current-password"
           />
 
-          {actionData?.error && (
-            <div
-              style={{
-                padding: spacing.md,
-                backgroundColor: '#FFEBEE',
-                borderLeft: `4px solid ${colors.critical}`,
-                color: colors.critical,
-                marginBottom: spacing.lg,
-                borderRadius: '4px',
-                fontSize: '14px',
-              }}
-            >
-              {actionData.error}
-            </div>
-          )}
+          {actionData?.error && <ErrorAlert message={actionData.error} />}
 
           <button
             type="submit"

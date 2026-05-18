@@ -1,7 +1,6 @@
 /**
- * FormField Component — Reusable form input wrapper
+ * FormField — Reusable form input component
  * Combines label, input, error message, and help text
- * Replaces 50+ inline input definitions across the app
  */
 
 import React from 'react';
@@ -10,15 +9,16 @@ import { spacing, colors } from '../../tokens';
 interface FormFieldProps {
   label: string;
   name: string;
-  type?: 'text' | 'email' | 'password' | 'number' | 'tel' | 'url';
+  type?: 'text' | 'email' | 'password' | 'number' | 'tel' | 'url' | 'textarea';
   value?: string;
-  onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  onChange?: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
   error?: string;
   required?: boolean;
   helpText?: string;
   placeholder?: string;
   disabled?: boolean;
   autoComplete?: string;
+  rows?: number;
 }
 
 export const FormField: React.FC<FormFieldProps> = ({
@@ -33,7 +33,10 @@ export const FormField: React.FC<FormFieldProps> = ({
   placeholder,
   disabled = false,
   autoComplete,
+  rows = 3,
 }) => {
+  const isTextarea = type === 'textarea';
+
   return (
     <div
       style={{
@@ -58,34 +61,65 @@ export const FormField: React.FC<FormFieldProps> = ({
         {required && <span style={{ color: colors.critical }}>*</span>}
       </label>
 
-      <input
-        id={name}
-        name={name}
-        type={type}
-        value={value}
-        onChange={onChange}
-        placeholder={placeholder}
-        disabled={disabled}
-        autoComplete={autoComplete}
-        required={required}
-        style={{
-          padding: `${spacing.sm} ${spacing.md}`,
-          border: `1px solid ${error ? colors.critical : colors.gray300}`,
-          borderRadius: '4px',
-          fontSize: '14px',
-          fontFamily: 'inherit',
-          backgroundColor: disabled ? colors.gray100 : colors.white,
-          color: colors.gray900,
-          transition: 'border-color 200ms ease',
-          outline: 'none',
-        }}
-        onFocus={(e) => {
-          e.currentTarget.style.borderColor = colors.primary;
-        }}
-        onBlur={(e) => {
-          e.currentTarget.style.borderColor = error ? colors.critical : colors.gray300;
-        }}
-      />
+      {isTextarea ? (
+        <textarea
+          id={name}
+          name={name}
+          value={value}
+          onChange={onChange as (e: React.ChangeEvent<HTMLTextAreaElement>) => void}
+          placeholder={placeholder}
+          disabled={disabled}
+          required={required}
+          rows={rows}
+          style={{
+            padding: `${spacing.sm} ${spacing.md}`,
+            border: `1px solid ${error ? colors.critical : colors.gray300}`,
+            borderRadius: '6px',
+            fontSize: '14px',
+            fontFamily: 'inherit',
+            backgroundColor: disabled ? colors.gray100 : colors.white,
+            color: colors.gray900,
+            transition: 'border-color 200ms ease',
+            outline: 'none',
+            resize: 'vertical',
+          }}
+          onFocus={(e) => {
+            e.currentTarget.style.borderColor = colors.primary;
+          }}
+          onBlur={(e) => {
+            e.currentTarget.style.borderColor = error ? colors.critical : colors.gray300;
+          }}
+        />
+      ) : (
+        <input
+          id={name}
+          name={name}
+          type={type}
+          value={value}
+          onChange={onChange as (e: React.ChangeEvent<HTMLInputElement>) => void}
+          placeholder={placeholder}
+          disabled={disabled}
+          autoComplete={autoComplete}
+          required={required}
+          style={{
+            padding: `${spacing.sm} ${spacing.md}`,
+            border: `1px solid ${error ? colors.critical : colors.gray300}`,
+            borderRadius: '6px',
+            fontSize: '14px',
+            fontFamily: 'inherit',
+            backgroundColor: disabled ? colors.gray100 : colors.white,
+            color: colors.gray900,
+            transition: 'border-color 200ms ease',
+            outline: 'none',
+          }}
+          onFocus={(e) => {
+            e.currentTarget.style.borderColor = colors.primary;
+          }}
+          onBlur={(e) => {
+            e.currentTarget.style.borderColor = error ? colors.critical : colors.gray300;
+          }}
+        />
+      )}
 
       {error && (
         <p
@@ -103,7 +137,7 @@ export const FormField: React.FC<FormFieldProps> = ({
       {helpText && !error && (
         <p
           style={{
-            color: colors.gray500,
+            color: colors.gray600,
             fontSize: '12px',
             margin: 0,
             marginTop: spacing.xs,

@@ -1,78 +1,58 @@
-/**
- * StatusBadge Component — Color-coded status indicator
- * Used for keyword status, project status, user status
- */
-
-import React from 'react';
-import { getStatusColor } from '../../tokens/colors';
-import { spacing } from '../../tokens';
-
-type StatusType = 'active' | 'pending' | 'archived' | 'banned';
+import { colors } from '~/design-system/tokens/colors';
 
 interface StatusBadgeProps {
-  status: StatusType;
-  children?: React.ReactNode;
+  status: 'active' | 'pending' | 'archived' | 'banned' | 'success' | 'warning' | 'critical';
+  children: React.ReactNode;
 }
 
-export const StatusBadge: React.FC<StatusBadgeProps> = ({ status, children }) => {
-  const getStatusLabel = (): string => {
+export function StatusBadge({ status, children }: StatusBadgeProps) {
+  const getStatusStyle = () => {
     switch (status) {
       case 'active':
-        return 'Ativo';
+      case 'success':
+        return {
+          backgroundColor: '#E8F5E9',
+          color: colors.success,
+          borderLeft: `4px solid ${colors.success}`,
+        };
       case 'pending':
-        return 'Pendente';
+      case 'warning':
+        return {
+          backgroundColor: '#FFF3E0',
+          color: colors.warning,
+          borderLeft: `4px solid ${colors.warning}`,
+        };
       case 'archived':
-        return 'Arquivado';
       case 'banned':
-        return 'Bloqueado';
+      case 'critical':
+        return {
+          backgroundColor: '#FFEBEE',
+          color: colors.critical,
+          borderLeft: `4px solid ${colors.critical}`,
+        };
       default:
-        return status;
+        return {
+          backgroundColor: colors.gray100,
+          color: colors.gray700,
+          borderLeft: `4px solid ${colors.gray300}`,
+        };
     }
   };
 
-  const color = getStatusColor(status);
-
-  // Lighter background by using the color with opacity
-  const getLightBackground = (): string => {
-    const colorMap: Record<StatusType, string> = {
-      active: '#E8F5E9',
-      pending: '#FFF3E0',
-      archived: '#FFEBEE',
-      banned: '#FFEBEE',
-    };
-    return colorMap[status];
-  };
-
-  const label = children || getStatusLabel();
+  const style = getStatusStyle();
 
   return (
-    <span
+    <div
       style={{
-        display: 'inline-flex',
-        alignItems: 'center',
-        gap: spacing.xs,
-        padding: `${spacing.xs} ${spacing.sm}`,
-        backgroundColor: getLightBackground(),
-        border: `1px solid ${color}`,
-        borderRadius: '12px',
-        color: color,
+        display: 'inline-block',
+        padding: '4px 12px',
+        borderRadius: '4px',
         fontSize: '12px',
-        fontWeight: 500,
-        whiteSpace: 'nowrap',
+        fontWeight: 600,
+        ...style,
       }}
     >
-      <span
-        style={{
-          width: '6px',
-          height: '6px',
-          borderRadius: '50%',
-          backgroundColor: color,
-          flexShrink: 0,
-        }}
-      />
-      {label}
-    </span>
+      {children}
+    </div>
   );
-};
-
-export default StatusBadge;
+}
